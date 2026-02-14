@@ -1,40 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>QuantLab</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1220;
-      color: #e2e8f0;
-      scroll-behavior: smooth;
-    }
-
-    header {
-      padding: 60px 20px;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 1s ease forwards;
-    }
-
-    h1 { font-size: 40px; margin-bottom: 10px; }
-    nav a { margin: 0 10px; text-decoration: none; color: #38bdf8; font-weight: bold; }
-    section { padding: 50px 20px; max-width: 900px; margin: auto; opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
-    section.visible { opacity: 1; transform: translateY(0); }
-
-    .card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; }
-    button { background: #38bdf8; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; }
-    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
-
-    footer { text-align: center; padding: 30px; color: #64748b; }
-
-    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-    /* Responsive for phones */
+/* Responsive */
     @media (max-width: 600px) {
       h1 { font-size: 28px; }
       nav a { display: block; margin: 5px 0; }
@@ -56,31 +20,28 @@
   </nav>
 </header>
 
-<!-- Portfolio / Projects Section -->
 <section id="projects">
   <h2>Portfolio / Projects</h2>
   <div class="card">
     <h3>Monte Carlo Risk Simulation</h3>
-    <p>Stock price modelling using random sampling. Interactive simulation available below.</p>
+    <p>Stock price modelling using random sampling. Try the simulation below!</p>
   </div>
   <div class="card">
-    <h3>Compound Interest Model</h3>
-    <p>Investment growth over time using compound interest. Interactive simulation available below.</p>
+    <h3>Compound Interest Growth Model</h3>
+    <p>Investment growth over time using compound interest. Interactive simulation below!</p>
   </div>
   <div class="card">
     <h3>Future Projects</h3>
-    <p>Other quant research projects, data science mini-projects, or coding experiments can go here.</p>
+    <p>Other quant research projects, coding experiments, or data science mini-projects will go here.</p>
   </div>
 </section>
 
-<!-- Simulations Section -->
 <section id="simulations">
   <h2>Simulations</h2>
 
-  <!-- Monte Carlo Simulation -->
   <div class="card">
     <h3>Monte Carlo Risk Simulation</h3>
-    <p>Simulates stock prices using random sampling.</p>
+    <p>Simulates stock prices with random daily shocks.</p>
     <input type="number" id="mcStartPrice" placeholder="Start Price (£)" value="100">
     <input type="number" id="mcDays" placeholder="Trading Days" value="252">
     <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
@@ -90,7 +51,6 @@
     <canvas id="mcHistogram" width="400" height="200"></canvas>
   </div>
 
-  <!-- Compound Interest Simulation -->
   <div class="card">
     <h3>Compound Interest Growth Model</h3>
     <p>Simulates long-term investment growth.</p>
@@ -102,32 +62,88 @@
   </div>
 </section>
 
-<!-- Contact Section -->
 <section id="contact">
   <h2>Contact</h2>
   <div class="card">
-    let changePercent = ((avg - startPrice)/startPrice*100).toFixed(2);
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+    for (let i=0; i<simulations; i++) {
+      let price = startPrice;
+      for (let day=0; day<days; day++) {
+        let randomShock = (Math.random()-0.5)*0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    let changePercent = ((avg-startPrice)/startPrice*100).toFixed(2);
     document.getElementById("result").innerText = 
       `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
 
     // Line chart
-      data:{ labels:labels, datasets:[{label:'Simulation Outcome Distribution (£)', data:bins, backgroundColor:'#38bdf8'}]},
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day=0; day<days; day++) {
+      let randomShock = (Math.random()-0.5)*0.02;
+      price *= (1 + randomShock);
+      sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data:{labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}]},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max-min)/bins.length;
+    results.forEach(val=>{
+      let idx = Math.floor((val-min)/binWidth);
+      if(idx>=bins.length) idx=bins.length-1;
+      bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min+i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{labels:labels, datasets:[{label:'Simulation Distribution (£)', data:bins, backgroundColor:'#38bdf8'}]},
       options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
     });
   }
 
-  // Compound Interest Simulation
   function runCompound() {
     let principal = parseFloat(document.getElementById("ciPrincipal").value);
     let rate = parseFloat(document.getElementById("ciRate").value)/100;
     let years = parseInt(document.getElementById("ciYears").value);
-
     let amount = principal * Math.pow((1+rate), years);
     document.getElementById("compoundResult").innerText =
       `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
   }
 
-  // Scroll animations
   const sections = document.querySelectorAll("section");
   const observer = new IntersectionObserver(entries=>{
     entries.forEach(entry=>{
