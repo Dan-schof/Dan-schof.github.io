@@ -1,18 +1,40 @@
-/* Responsive */
-    @media (max-width: 600px) {
-      h1 { font-size: 28px; }
-      nav a { display: block; margin: 5px 0; }
-      .card { padding: 15px; }
-      input, textarea, button { font-size: 16px; }
-      canvas { width: 100% !important; height: auto !important; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
     }
+
+    header {
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    h1 { font-size: 48px; margin-bottom: 10px; color:#38bdf8;}
+    nav a { margin: 0 15px; text-decoration: none; color: #38bdf8; font-weight: bold; }
+    section { padding: 60px 20px; max-width: 900px; margin: auto; }
+    .card { background: #1e293b; padding: 25px; border-radius: 12px; margin: 25px 0; box-shadow: 0 0 15px rgba(56, 189, 248,0.3);}
+    button { background: #38bdf8; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; transition: 0.2s; }
+    button:hover { background: #22d3ee; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
+    footer { text-align: center; padding: 40px; color: #64748b; }
+
+    canvas { background:#0b1220; margin-top:20px; border-radius:10px; }
   </style>
 </head>
 <body>
 
 <header>
   <h1>QuantLab</h1>
-  <p>Student quantitative research & modelling.</p>
+  <p>Interactive quantitative simulations & portfolio</p>
   <nav>
     <a href="#projects">Projects</a>
     <a href="#simulations">Simulations</a>
@@ -24,24 +46,25 @@
   <h2>Portfolio / Projects</h2>
   <div class="card">
     <h3>Monte Carlo Risk Simulation</h3>
-    <p>Stock price modelling using random sampling. Try the simulation below!</p>
+    <p>Stock price modeling with random daily shocks.</p>
   </div>
   <div class="card">
-    <h3>Compound Interest Growth Model</h3>
-    <p>Investment growth over time using compound interest. Interactive simulation below!</p>
+    <h3>Compound Interest Model</h3>
+    <p>Long-term investment growth simulation with live chart.</p>
   </div>
   <div class="card">
     <h3>Future Projects</h3>
-    <p>Other quant research projects, coding experiments, or data science mini-projects will go here.</p>
+    <p>Other quant research or coding projects will appear here.</p>
   </div>
 </section>
 
 <section id="simulations">
   <h2>Simulations</h2>
 
+  <!-- Monte Carlo -->
   <div class="card">
-    <h3>Monte Carlo Risk Simulation</h3>
-    <p>Simulates stock prices with random daily shocks.</p>
+    <h3>Monte Carlo Simulation</h3>
+    <p>Simulates stock prices over time.</p>
     <input type="number" id="mcStartPrice" placeholder="Start Price (£)" value="100">
     <input type="number" id="mcDays" placeholder="Trading Days" value="252">
     <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
@@ -51,14 +74,16 @@
     <canvas id="mcHistogram" width="400" height="200"></canvas>
   </div>
 
+  <!-- Compound Interest -->
   <div class="card">
-    <h3>Compound Interest Growth Model</h3>
-    <p>Simulates long-term investment growth.</p>
+    <h3>Compound Interest Simulation</h3>
+    <p>Simulates growth of investment with compound interest.</p>
     <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
     <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
     <input type="number" id="ciYears" placeholder="Years" value="20">
     <button onclick="runCompound()">Run Growth Simulation</button>
     <p id="compoundResult"></p>
+    <canvas id="ciChart" width="400" height="200"></canvas>
   </div>
 </section>
 
@@ -79,6 +104,7 @@
 </footer>
 
 <script>
+  // Monte Carlo Simulation
   function runSimulation() {
     let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
     let days = parseInt(document.getElementById("mcDays").value);
@@ -112,7 +138,7 @@
     window.mcLineChart = new Chart(ctx, {
       type:'line',
       data:{labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}]},
-      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+      options:{responsive:true}
     });
 
     // Histogram
@@ -131,26 +157,32 @@
     window.mcHistChart = new Chart(ctxHist,{
       type:'bar',
       data:{labels:labels, datasets:[{label:'Simulation Distribution (£)', data:bins, backgroundColor:'#38bdf8'}]},
-      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+      options:{responsive:true}
     });
   }
 
+  // Compound Interest with growth chart
   function runCompound() {
     let principal = parseFloat(document.getElementById("ciPrincipal").value);
     let rate = parseFloat(document.getElementById("ciRate").value)/100;
     let years = parseInt(document.getElementById("ciYears").value);
-    let amount = principal * Math.pow((1+rate), years);
-    document.getElementById("compoundResult").innerText =
-      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
-  }
 
-  const sections = document.querySelectorAll("section");
-  const observer = new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting) entry.target.classList.add("visible");
+    let amounts = [];
+    for(let y=0; y<=years; y++){
+      amounts.push(principal * Math.pow(1+rate, y));
+    }
+
+    document.getElementById("compoundResult").innerText =
+      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to £${amounts[amounts.length-1].toFixed(2)}`;
+
+    let ctxCI = document.getElementById('ciChart').getContext('2d');
+    if(window.ciChartObj) window.ciChartObj.destroy();
+    window.ciChartObj = new Chart(ctxCI,{
+      type:'line',
+      data:{labels: amounts.map((_,i)=>i), datasets:[{label:'Compound Growth (£)', data:amounts, borderColor:'#38bdf8', borderWidth:2}]},
+      options:{responsive:true}
     });
-  });
-  sections.forEach(section=>observer.observe(section));
+  }
 </script>
 
 </body>
