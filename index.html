@@ -1,32 +1,34 @@
+
+Dan <danieldgschofield@gmail.com>
+10:09 AM (0 minutes ago)
+to me
+
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>QuantLab</title>
+
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #0f172a;
-      color: white;
-      text-align: center;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
     }
 
     header {
-      padding: 60px 20px;
+      padding: 80px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s ease forwards;
     }
 
     h1 {
-      font-size: 50px;
+      font-size: 48px;
       margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 20px;
-      color: #94a3b8;
-    }
-
-    nav {
-      margin-top: 30px;
     }
 
     nav a {
@@ -38,21 +40,53 @@
 
     section {
       padding: 60px 20px;
+      max-width: 800px;
+      margin: auto;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .card {
-      background-color: #1e293b;
-      margin: 20px auto;
-      padding: 20px;
-      width: 80%;
-      max-width: 600px;
-      border-radius: 10px;
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    button {
+      background: #38bdf8;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
     }
 
     footer {
-      padding: 30px;
-      font-size: 14px;
+      text-align: center;
+      padding: 40px;
       color: #64748b;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -61,47 +95,74 @@
 
 <header>
   <h1>QuantLab</h1>
-  <p>Student-built quantitative research & problem solving.</p>
-
+  <p>Student quantitative research & modelling.</p>
   <nav>
-    <a href="#about">About</a>
-    <a href="#projects">Projects</a>
+    <a href="#project">Project</a>
     <a href="#contact">Contact</a>
   </nav>
 </header>
 
-<section id="about">
-  <h2>About</h2>
+<section id="project">
+  <h2>Monte Carlo Risk Simulation</h2>
   <div class="card">
-    <p>QuantLab is a student-led initiative focused on mathematics, modelling, and analytical thinking. Built to explore real-world quantitative problems from a young age.</p>
+    <p>This simulation models 1-year stock price outcomes using random sampling.</p>
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
   </div>
-</section>
-
-<section id="projects">
-  <h2>Projects</h2>
-
-  <div class="card">
-    <h3>Actuarial Risk Model</h3>
-    <p>Building probability-based models to simulate financial risk.</p>
-  </div>
-
-  <div class="card">
-    <h3>Geometry Research</h3>
-    <p>Exploring geometric optimisation and real-world applications.</p>
-  </div>
-
 </section>
 
 <section id="contact">
   <h2>Contact</h2>
   <div class="card">
-    <p>Email coming soon.</p>
+    <!-- Replace action URL with your Formspree link later -->
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
   </div>
 </section>
 
 <footer>
   © 2026 QuantLab | Built by Dan
 </footer>
+
+<script>
+  function runSimulation() {
+    let startPrice = 100;
+    let simulations = 1000;
+    let results = [];
+
+    for (let i = 0; i < simulations; i++) {
+      let price = startPrice;
+      for (let day = 0; day < 252; day++) {
+        let randomShock = (Math.random() - 0.5) * 0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a, b) => a + b) / simulations;
+    document.getElementById("result").innerText =
+      "Average simulated price after 1 year: $" + avg.toFixed(2);
+  }
+
+  // Scroll animation
+  const sections = document.querySelectorAll("section");
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  });
+
+  sections.forEach(section => {
+    observer.observe(section);
+  });
+</script>
 
 </body>
 </html>
