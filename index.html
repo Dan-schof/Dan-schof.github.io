@@ -103,6 +103,12 @@ to me
 </header>
 
 <section id="project">
+<div class="card">
+  <h3>Compound Interest Growth Model</h3>
+  <p>Simulates long-term growth using compound interest.</p>
+  <button onclick="runCompound()">Run Growth Simulation</button>
+  <p id="compoundResult"></p>
+</div>
   <h2>Monte Carlo Risk Simulation</h2>
   <div class="card">
     <p>This simulation models 1-year stock price outcomes using random sampling.</p>
@@ -162,6 +168,17 @@ to me
   sections.forEach(section => {
     observer.observe(section);
   });
+function runCompound() {
+  let principal = 1000;
+  let rate = 0.07; // 7% yearly return
+  let years = 20;
+
+  let amount = principal * Math.pow((1 + rate), years);
+
+  document.getElementById("compoundResult").innerText =
+    "£" + principal + " invested at 7% for 20 years grows to: £" + amount.toFixed(2);
+}
+
 </script>
 
 </body>
