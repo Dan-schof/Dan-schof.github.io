@@ -1,109 +1,93 @@
 <!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>QuantLab</title>
+<title>QuantLab Research Lab</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body{margin:0;font-family:Arial;background:#0b1220;color:#e2e8f0}
-header{text-align:center;padding:50px}
-h1{color:#38bdf8;font-size:48px}
+header{text-align:center;padding:60px}
+h1{color:#38bdf8;font-size:48px;margin:0}
+nav{margin-top:15px}
+nav a{color:#38bdf8;margin:0 15px;text-decoration:none;font-weight:bold}
 section{max-width:1000px;margin:auto;padding:40px}
-.card{background:#1e293b;padding:25px;border-radius:12px;margin:25px 0;box-shadow:0 0 15px rgba(56,189,248,.3)}
-button{background:#38bdf8;border:none;padding:12px 20px;border-radius:6px;font-weight:bold;cursor:pointer;color:#0b1220}
+.card{background:#1e293b;padding:25px;border-radius:12px;margin:25px 0;box-shadow:0 0 15px rgba(56,189,248,.25)}
+button{background:#38bdf8;border:none;padding:12px 20px;border-radius:6px;font-weight:bold;cursor:pointer;color:#0b1220;margin-top:8px}
 input{width:100%;padding:8px;margin:8px 0;border-radius:6px;border:none}
 canvas{background:#0b1220;border-radius:10px;margin-top:20px}
 table{width:100%;border-collapse:collapse;margin-top:20px}
 th,td{border:1px solid #334155;padding:8px;text-align:center}
+footer{text-align:center;padding:30px;color:#64748b}
 </style>
 </head>
 <body>
 <header>
 <h1>QuantLab</h1>
-<p>Interactive quantitative finance experiments</p>
-</header><section>
+<p>Student Quantitative Research Lab</p>
+<nav>
+<a href="#research">Research</a>
+<a href="#simulations">Simulations</a>
+<a href="#strategies">Strategies</a>
+<a href="#contact">Contact</a>
+</nav>
+</header><section id="research">
+<h2>Research Purpose</h2>
 <div class="card">
-<h2>Monte Carlo Market Simulation</h2>
-<input type="number" id="mcStartPrice" value="100" placeholder="Start Price (£)">
-<input type="number" id="mcDays" value="250" placeholder="Days">
-<input type="number" id="mcSimulations" value="500" placeholder="Simulations">
-<label>Volatility: <span id="volLabel">2%</span></label>
-<input type="range" min="0.005" max="0.05" step="0.005" value="0.02" id="volatility">
-<button onclick="runSimulation()">Run Simulation</button>
-<button onclick="marketCrash()">Simulate Crash</button>
-<p id="result"></p>
-<canvas id="mcChart" width="400" height="200"></canvas>
-<canvas id="mcHistogram" width="400" height="200"></canvas>
-<div id="explanation"></div>
-</div><div class="card">
-<h2>Compound Interest Comparison</h2>
-<input type="number" id="ciPrincipal" value="1000" placeholder="Principal (£)">
-<input type="number" id="rate1" value="5" placeholder="Rate 1 %">
-<input type="number" id="rate2" value="8" placeholder="Rate 2 %">
-<input type="number" id="rate3" value="12" placeholder="Rate 3 %">
-<input type="number" id="ciYears" value="20" placeholder="Years">
-<button onclick="runCompound()">Compare Growth</button>
-<canvas id="ciChart" width="400" height="200"></canvas>
-<table id="logTable">
-<tr><th>Principal</th><th>Rate</th><th>Years</th><th>Final Value</th></tr>
-</table>
+<p>This lab investigates how randomness, volatility and time affect investment outcomes. Each experiment tests a hypothesis about financial risk.</p>
 </div>
-</section><script>
-let crash=false;
+</section><section id="simulations">
+<h2>Monte Carlo Market Model</h2>
+<div class="card">
+<input type="number" id="start" value="100" placeholder="Start Price (£)">
+<input type="number" id="days" value="252" placeholder="Days">
+<label>Volatility <span id="vLabel">2%</span></label>
+<input type="range" id="vol" min="0.005" max="0.05" step="0.005" value="0.02">
+<button onclick="runMC()">Run Experiment</button>
+<p id="mcOut"></p>
+<canvas id="mcChart"></canvas>
+</div>
+</section><section id="strategies">
+<h2>Strategy Comparison</h2>
+<div class="card">
+<input type="number" id="principal" value="1000" placeholder="Starting Investment">
+<input type="number" id="rate" value="7" placeholder="Average Return %">
+<input type="number" id="years" value="20" placeholder="Years">
+<button onclick="compare()">Test Strategies</button>
+<canvas id="strategyChart"></canvas>
+<table id="results"><tr><th>Strategy</th><th>Final Value</th></tr></table>
+</div>
+</section><section id="contact">
+<h2>Contact</h2>
+<div class="card">
+<form action="https://formspree.io/f/yourcode" method="POST">
+<input name="name" placeholder="Name" required>
+<input name="email" type="email" placeholder="Email" required>
+<input name="message" placeholder="Message" required>
+<button type="submit">Send</button>
+</form>
+</div>
+</section><footer>© QuantLab Research Project</footer><script>
+vol.oninput=e=>vLabel.innerText=(e.target.value*100).toFixed(1)+"%";
 
-document.getElementById("volatility").oninput=e=>{
- document.getElementById("volLabel").innerText=(e.target.value*100).toFixed(1)+"%";
+function runMC(){
+ let s=+start.value,d=+days.value,v=+vol.value;
+ let prices=[s];let p=s;
+ for(let i=0;i<d;i++){p*=1+(Math.random()-0.5)*v;prices.push(p);} 
+ mcOut.innerText=`Final simulated price: £${p.toFixed(2)}`;
+ if(window.mc)mc.destroy();
+ mc=new Chart(mcChart,{type:'line',data:{labels:prices.map((_,i)=>i),datasets:[{label:'Price Path',data:prices,borderColor:'#38bdf8'}]}});
 }
 
-function marketCrash(){crash=true;alert("Market crash will occur during next simulation!")}
-
-function runSimulation(){
- let start=parseFloat(mcStartPrice.value);
- let days=parseInt(mcDays.value);
- let sims=parseInt(mcSimulations.value);
- let vol=parseFloat(volatility.value);
- let results=[];
-
- for(let i=0;i<sims;i++){
-  let price=start;
-  let crashDay=Math.floor(Math.random()*days);
-  for(let d=0;d<days;d++){
-    if(crash&&d===crashDay) price*=0.7;
-    price*=1+(Math.random()-0.5)*vol;
-  }
-  results.push(price);
- }
- crash=false;
-
- let avg=results.reduce((a,b)=>a+b)/sims;
- result.innerText=`Average final price: £${avg.toFixed(2)}`;
- explanation.innerText=vol>0.025?"High volatility increases both potential gains and losses, widening outcomes.":"Lower volatility keeps outcomes clustered and predictable.";
-
- let sample=[start];let price=start;
- for(let d=0;d<days;d++){price*=1+(Math.random()-0.5)*vol;sample.push(price)}
- if(window.line)line.destroy();
- line=new Chart(mcChart,{type:'line',data:{labels:sample.map((_,i)=>i),datasets:[{label:'Price Path',data:sample,borderColor:'#38bdf8'}]}});
-
- let bins=new Array(20).fill(0);
- let min=Math.min(...results),max=Math.max(...results),w=(max-min)/20;
- results.forEach(v=>{let i=Math.min(19,Math.floor((v-min)/w));bins[i]++});
- if(window.hist)hist.destroy();
- hist=new Chart(mcHistogram,{type:'bar',data:{labels:bins.map((_,i)=>(min+i*w).toFixed(0)),datasets:[{data:bins,backgroundColor:'#38bdf8'}]}});
-}
-
-function runCompound(){
- let P=parseFloat(ciPrincipal.value);
- let years=parseInt(ciYears.value);
- let rates=[rate1.value,rate2.value,rate3.value].map(r=>parseFloat(r)/100);
- let datasets=[];
- rates.forEach((r,i)=>{
-  let data=[];
-  for(let y=0;y<=years;y++)data.push(P*Math.pow(1+r,y));
-  datasets.push({label:`${(r*100)}%`,data,borderWidth:2});
-  let row=logTable.insertRow(-1);
-  row.innerHTML=`<td>£${P}</td><td>${(r*100)}%</td><td>${years}</td><td>£${data[data.length-1].toFixed(2)}</td>`;
- });
- if(window.ci)ci.destroy();
- ci=new Chart(ciChart,{type:'line',data:{labels:Array.from({length:years+1},(_,i)=>i),datasets}});
+function compare(){
+ let P=+principal.value,r=+rate.value/100,y=+years.value;
+ let hold=P*Math.pow(1+r,y);
+ let yearly=P;for(let i=0;i<y;i++)yearly+=P*Math.pow(1+r,y-i);
+ let cash=P;
+ results.innerHTML='<tr><th>Strategy</th><th>Final Value</th></tr>'+
+ `<tr><td>Buy & Hold</td><td>£${hold.toFixed(2)}</td></tr>`+
+ `<tr><td>Dollar Cost Averaging</td><td>£${yearly.toFixed(2)}</td></tr>`+
+ `<tr><td>No Investment</td><td>£${cash.toFixed(2)}</td></tr>`;
+ if(window.sc)sc.destroy();
+ sc=new Chart(strategyChart,{type:'bar',data:{labels:['Hold','DCA','Cash'],datasets:[{data:[hold,yearly,cash],backgroundColor:'#38bdf8'}]}});
 }
 </script></body>
 </html>
