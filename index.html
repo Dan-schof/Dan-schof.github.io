@@ -1,3 +1,117 @@
+ <!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuantLab Research Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{margin:0;font-family:Arial;background:#0b1220;color:#e2e8f0}
+header{text-align:center;padding:60px}
+h1{color:#38bdf8;font-size:48px;margin:0}
+nav{margin-top:15px}
+nav a{color:#38bdf8;margin:0 15px;text-decoration:none;font-weight:bold}
+section{max-width:1000px;margin:auto;padding:40px}
+.card{background:#1e293b;padding:25px;border-radius:12px;margin:25px 0;box-shadow:0 0 15px rgba(56,189,248,.25)}
+button{background:#38bdf8;border:none;padding:12px 20px;border-radius:6px;font-weight:bold;cursor:pointer;color:#0b1220;margin-top:8px}
+input{width:100%;padding:8px;margin:8px 0;border-radius:6px;border:none}
+canvas{background:#0b1220;border-radius:10px;margin-top:20px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #334155;padding:8px;text-align:center}
+footer{text-align:center;padding:30px;color:#64748b}
+</style>
+</head>
+<body>
+<header>
+<h1>QuantLab</h1>
+<p>Student Quantitative Research Lab</p>
+<nav>
+<a href="#research">Research</a>
+<a href="#simulations">Simulations</a>
+<a href="#strategies">Strategies</a>
+<a href="#contact">Contact</a>
+</nav>
+</header><section id="research">
+<h2>Research Purpose</h2>
+<div class="card">
+<p>This lab investigates how randomness, volatility and time affect investment outcomes. Each experiment tests a hypothesis about financial risk.</p>
+</div>
+</section><section id="simulations">
+<h2>Monte Carlo Market Model</h2>
+<div class="card">
+<input type="number" id="start" value="100" placeholder="Start Price (£)">
+<input type="number" id="days" value="252" placeholder="Days">
+<label>Volatility <span id="vLabel">2%</span></label>
+<input type="range" id="vol" min="0.005" max="0.05" step="0.005" value="0.02">
+<button onclick="runMC()">Run Experiment</button>
+<p id="mcOut"></p>
+<canvas id="mcChart"></canvas>
+</div>
+</section><section id="strategies">
+<h2>Strategy Comparison</h2>
+<div class="card">
+<input type="number" id="principal" value="1000" placeholder="Starting Investment">
+<input type="number" id="rate" value="7" placeholder="Average Return %">
+<input type="number" id="years" value="20" placeholder="Years">
+<button onclick="compare()">Test Strategies</button>
+<canvas id="strategyChart"></canvas>
+<table id="results"><tr><th>Strategy</th><th>Final Value</th></tr></table>
+</div>
+</section><section id="historical">
+<h2>Historical Market Trends</h2>
+<div class="card">
+<p>Upload a CSV file named <b>market.csv</b> containing Date,Price columns into the repo to visualise real market history.</p>
+<canvas id="historyChart"></canvas>
+</div>
+</section><section id="contact">
+<h2>Contact</h2>
+<div class="card">
+<form action="https://formspree.io/f/yourcode" method="POST">
+<input name="name" placeholder="Name" required>
+<input name="email" type="email" placeholder="Email" required>
+<input name="message" placeholder="Message" required>
+<button type="submit">Send</button>
+</form>
+</div>
+</section><footer>© QuantLab Research Project</footer><script>
+vol.oninput=e=>vLabel.innerText=(e.target.value*100).toFixed(1)+"%";
+
+function runMC(){
+ let s=+start.value,d=+days.value,v=+vol.value;
+ let prices=[s];let p=s;
+ for(let i=0;i<d;i++){p*=1+(Math.random()-0.5)*v;prices.push(p);} 
+ mcOut.innerText=`Final simulated price: £${p.toFixed(2)}`;
+ if(window.mc)mc.destroy();
+ mc=new Chart(mcChart,{type:'line',data:{labels:prices.map((_,i)=>i),datasets:[{label:'Price Path',data:prices,borderColor:'#38bdf8'}]}});
+}
+
+function compare(){
+ let P=+principal.value,r=+rate.value/100,y=+years.value;
+ let hold=P*Math.pow(1+r,y);
+ let yearly=P;for(let i=0;i<y;i++)yearly+=P*Math.pow(1+r,y-i);
+ let cash=P;
+ results.innerHTML='<tr><th>Strategy</th><th>Final Value</th></tr>'+
+ `<tr><td>Buy & Hold</td><td>£${hold.toFixed(2)}</td></tr>`+
+ `<tr><td>Dollar Cost Averaging</td><td>£${yearly.toFixed(2)}</td></tr>`+
+ `<tr><td>No Investment</td><td>£${cash.toFixed(2)}</td></tr>`;
+ if(window.sc)sc.destroy();
+ sc=new Chart(strategyChart,{type:'bar',data:{labels:['Hold','DCA','Cash'],datasets:[{data:[hold,yearly,cash],backgroundColor:'#38bdf8'}]}});
+}
+</script><script>
+async function loadHistory(){
+ try{
+  const res=await fetch('market.csv');
+  const text=await res.text();
+  const rows=text.trim().split('
+').slice(1);
+  let labels=[],prices=[];
+  rows.forEach(r=>{let [d,p]=r.split(',');labels.push(d);prices.push(parseFloat(p));});
+  new Chart(document.getElementById('historyChart'),{type:'line',data:{labels,datasets:[{label:'Historical Price',data:prices,borderColor:'#38bdf8'}]}});
+ }catch(e){console.log('No historical data yet');}
+}
+window.addEventListener('load',loadHistory);
+</script></body>
+</html>
+
+On Sun, 15 Feb 2026, 21:29 Dan, <danieldgschofield@gmail.com> wrote:
 <!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -91,3 +205,1435 @@ function compare(){
 }
 </script></body>
 </html>
+
+On Sun, 15 Feb 2026, 21:11 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuantLab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{margin:0;font-family:Arial;background:#0b1220;color:#e2e8f0}
+header{text-align:center;padding:50px}
+h1{color:#38bdf8;font-size:48px}
+section{max-width:1000px;margin:auto;padding:40px}
+.card{background:#1e293b;padding:25px;border-radius:12px;margin:25px 0;box-shadow:0 0 15px rgba(56,189,248,.3)}
+button{background:#38bdf8;border:none;padding:12px 20px;border-radius:6px;font-weight:bold;cursor:pointer;color:#0b1220}
+input{width:100%;padding:8px;margin:8px 0;border-radius:6px;border:none}
+canvas{background:#0b1220;border-radius:10px;margin-top:20px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #334155;padding:8px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<h1>QuantLab</h1>
+<p>Interactive quantitative finance experiments</p>
+</header><section>
+<div class="card">
+<h2>Monte Carlo Market Simulation</h2>
+<input type="number" id="mcStartPrice" value="100" placeholder="Start Price (£)">
+<input type="number" id="mcDays" value="252" placeholder="Days">
+<input type="number" id="mcSimulations" value="500" placeholder="Simulations">
+<label>Volatility: <span id="volLabel">2%</span></label>
+<input type="range" min="0.005" max="0.05" step="0.005" value="0.02" id="volatility">
+<button onclick="runSimulation()">Run Simulation</button>
+<button onclick="marketCrash()">Simulate Crash</button>
+<p id="result"></p>
+<canvas id="mcChart" width="400" height="200"></canvas>
+<canvas id="mcHistogram" width="400" height="200"></canvas>
+<div id="explanation"></div>
+</div><div class="card">
+<h2>Compound Interest Comparison</h2>
+<input type="number" id="ciPrincipal" value="1000" placeholder="Principal (£)">
+<input type="number" id="rate1" value="5" placeholder="Rate 1 %">
+<input type="number" id="rate2" value="8" placeholder="Rate 2 %">
+<input type="number" id="rate3" value="12" placeholder="Rate 3 %">
+<input type="number" id="ciYears" value="20" placeholder="Years">
+<button onclick="runCompound()">Compare Growth</button>
+<canvas id="ciChart" width="400" height="200"></canvas>
+<table id="logTable">
+<tr><th>Principal</th><th>Rate</th><th>Years</th><th>Final Value</th></tr>
+</table>
+</div>
+</section><script>
+let crash=false;
+
+document.getElementById("volatility").oninput=e=>{
+ document.getElementById("volLabel").innerText=(e.target.value*100).toFixed(1)+"%";
+}
+
+function marketCrash(){crash=true;alert("Market crash will occur during next simulation!")}
+
+function runSimulation(){
+ let start=parseFloat(mcStartPrice.value);
+ let days=parseInt(mcDays.value);
+ let sims=parseInt(mcSimulations.value);
+ let vol=parseFloat(volatility.value);
+ let results=[];
+
+ for(let i=0;i<sims;i++){
+  let price=start;
+  let crashDay=Math.floor(Math.random()*days);
+  for(let d=0;d<days;d++){
+    if(crash&&d===crashDay) price*=0.7;
+    price*=1+(Math.random()-0.5)*vol;
+  }
+  results.push(price);
+ }
+ crash=false;
+
+ let avg=results.reduce((a,b)=>a+b)/sims;
+ result.innerText=`Average final price: £${avg.toFixed(2)}`;
+ explanation.innerText=vol>0.025?"High volatility increases both potential gains and losses, widening outcomes.":"Lower volatility keeps outcomes clustered and predictable.";
+
+ let sample=[start];let price=start;
+ for(let d=0;d<days;d++){price*=1+(Math.random()-0.5)*vol;sample.push(price)}
+ if(window.line)line.destroy();
+ line=new Chart(mcChart,{type:'line',data:{labels:sample.map((_,i)=>i),datasets:[{label:'Price Path',data:sample,borderColor:'#38bdf8'}]}});
+
+ let bins=new Array(20).fill(0);
+ let min=Math.min(...results),max=Math.max(...results),w=(max-min)/20;
+ results.forEach(v=>{let i=Math.min(19,Math.floor((v-min)/w));bins[i]++});
+ if(window.hist)hist.destroy();
+ hist=new Chart(mcHistogram,{type:'bar',data:{labels:bins.map((_,i)=>(min+i*w).toFixed(0)),datasets:[{data:bins,backgroundColor:'#38bdf8'}]}});
+}
+
+function runCompound(){
+ let P=parseFloat(ciPrincipal.value);
+ let years=parseInt(ciYears.value);
+ let rates=[rate1.value,rate2.value,rate3.value].map(r=>parseFloat(r)/100);
+ let datasets=[];
+ rates.forEach((r,i)=>{
+  let data=[];
+  for(let y=0;y<=years;y++)data.push(P*Math.pow(1+r,y));
+  datasets.push({label:`${(r*100)}%`,data,borderWidth:2});
+  let row=logTable.insertRow(-1);
+  row.innerHTML=`<td>£${P}</td><td>${(r*100)}%</td><td>${years}</td><td>£${data[data.length-1].toFixed(2)}</td>`;
+ });
+ if(window.ci)ci.destroy();
+ ci=new Chart(ciChart,{type:'line',data:{labels:Array.from({length:years+1},(_,i)=>i),datasets}});
+}
+</script></body>
+</html>
+
+On Sat, 14 Feb 2026, 10:59 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    h1 { font-size: 48px; margin-bottom: 10px; color:#38bdf8;}
+    nav a { margin: 0 15px; text-decoration: none; color: #38bdf8; font-weight: bold; }
+    section { padding: 60px 20px; max-width: 900px; margin: auto; }
+    .card { background: #1e293b; padding: 25px; border-radius: 12px; margin: 25px 0; box-shadow: 0 0 15px rgba(56, 189, 248,0.3);}
+    button { background: #38bdf8; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; transition: 0.2s; }
+    button:hover { background: #22d3ee; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
+    footer { text-align: center; padding: 40px; color: #64748b; }
+
+    canvas { background:#0b1220; margin-top:20px; border-radius:10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Interactive quantitative simulations & portfolio</p>
+  <nav>
+    <a href="#projects">Projects</a>
+    <a href="#simulations">Simulations</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="projects">
+  <h2>Portfolio / Projects</h2>
+  <div class="card">
+    <h3>Monte Carlo Risk Simulation</h3>
+    <p>Stock price modeling with random daily shocks.</p>
+  </div>
+  <div class="card">
+    <h3>Compound Interest Model</h3>
+    <p>Long-term investment growth simulation with live chart.</p>
+  </div>
+  <div class="card">
+    <h3>Future Projects</h3>
+    <p>Other quant research or coding projects will appear here.</p>
+  </div>
+</section>
+
+<section id="simulations">
+  <h2>Simulations</h2>
+
+  <!-- Monte Carlo -->
+  <div class="card">
+    <h3>Monte Carlo Simulation</h3>
+    <p>Simulates stock prices over time.</p>
+    <input type="number" id="mcStartPrice" placeholder="Start Price (£)" value="100">
+    <input type="number" id="mcDays" placeholder="Trading Days" value="252">
+    <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
+    <canvas id="mcChart" width="400" height="200"></canvas>
+    <canvas id="mcHistogram" width="400" height="200"></canvas>
+  </div>
+
+  <!-- Compound Interest -->
+  <div class="card">
+    <h3>Compound Interest Simulation</h3>
+    <p>Simulates growth of investment with compound interest.</p>
+    <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
+    <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
+    <input type="number" id="ciYears" placeholder="Years" value="20">
+    <button onclick="runCompound()">Run Growth Simulation</button>
+    <p id="compoundResult"></p>
+    <canvas id="ciChart" width="400" height="200"></canvas>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  // Monte Carlo Simulation
+  function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+    for (let i=0; i<simulations; i++) {
+      let price = startPrice;
+      for (let day=0; day<days; day++) {
+        let randomShock = (Math.random()-0.5)*0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    let changePercent = ((avg-startPrice)/startPrice*100).toFixed(2);
+    document.getElementById("result").innerText = 
+      `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
+
+    // Line chart
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day=0; day<days; day++) {
+      let randomShock = (Math.random()-0.5)*0.02;
+      price *= (1 + randomShock);
+      sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data:{labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}]},
+      options:{responsive:true}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max-min)/bins.length;
+    results.forEach(val=>{
+      let idx = Math.floor((val-min)/binWidth);
+      if(idx>=bins.length) idx=bins.length-1;
+      bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min+i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{labels:labels, datasets:[{label:'Simulation Distribution (£)', data:bins, backgroundColor:'#38bdf8'}]},
+      options:{responsive:true}
+    });
+  }
+
+  // Compound Interest with growth chart
+  function runCompound() {
+    let principal = parseFloat(document.getElementById("ciPrincipal").value);
+    let rate = parseFloat(document.getElementById("ciRate").value)/100;
+    let years = parseInt(document.getElementById("ciYears").value);
+
+    let amounts = [];
+    for(let y=0; y<=years; y++){
+      amounts.push(principal * Math.pow(1+rate, y));
+    }
+
+    document.getElementById("compoundResult").innerText =
+      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to £${amounts[amounts.length-1].toFixed(2)}`;
+
+    let ctxCI = document.getElementById('ciChart').getContext('2d');
+    if(window.ciChartObj) window.ciChartObj.destroy();
+    window.ciChartObj = new Chart(ctxCI,{
+      type:'line',
+      data:{labels: amounts.map((_,i)=>i), datasets:[{label:'Compound Growth (£)', data:amounts, borderColor:'#38bdf8', borderWidth:2}]},
+      options:{responsive:true}
+    });
+  }
+</script>
+
+</body>
+</html>
+
+On Sat, 14 Feb 2026, 10:53 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      padding: 60px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s ease forwards;
+    }
+
+    h1 { font-size: 40px; margin-bottom: 10px; }
+    nav a { margin: 0 10px; text-decoration: none; color: #38bdf8; font-weight: bold; }
+    section { padding: 50px 20px; max-width: 900px; margin: auto; opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
+    section.visible { opacity: 1; transform: translateY(0); }
+
+    .card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; }
+    button { background: #38bdf8; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
+
+    footer { text-align: center; padding: 30px; color: #64748b; }
+
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 { font-size: 28px; }
+      nav a { display: block; margin: 5px 0; }
+      .card { padding: 15px; }
+      input, textarea, button { font-size: 16px; }
+      canvas { width: 100% !important; height: auto !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Student quantitative research & modelling.</p>
+  <nav>
+    <a href="#projects">Projects</a>
+    <a href="#simulations">Simulations</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="projects">
+  <h2>Portfolio / Projects</h2>
+  <div class="card">
+    <h3>Monte Carlo Risk Simulation</h3>
+    <p>Stock price modelling using random sampling. Try the simulation below!</p>
+  </div>
+  <div class="card">
+    <h3>Compound Interest Growth Model</h3>
+    <p>Investment growth over time using compound interest. Interactive simulation below!</p>
+  </div>
+ <div class="card">
+    <h3>Future Projects</h3>
+    <p>Other quant research projects, coding experiments, or data science mini-projects will go here.</p>
+  </div>
+</section>
+
+<section id="simulations">
+  <h2>Simulations</h2>
+
+  <div class="card">
+    <h3>Monte Carlo Risk Simulation</h3>
+    <p>Simulates stock prices with random daily shocks.</p>
+    <input type="number" id="mcStartPrice" placeholder="Start Price (£)" value="100">
+    <input type="number" id="mcDays" placeholder="Trading Days" value="252">
+    <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
+    <canvas id="mcChart" width="400" height="200"></canvas>
+    <canvas id="mcHistogram" width="400" height="200"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Compound Interest Growth Model</h3>
+    <p>Simulates long-term investment growth.</p>
+    <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
+    <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
+    <input type="number" id="ciYears" placeholder="Years" value="20">
+    <button onclick="runCompound()">Run Growth Simulation</button>
+    <p id="compoundResult"></p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+    for (let i=0; i<simulations; i++) {
+      let price = startPrice;
+      for (let day=0; day<days; day++) {
+        let randomShock = (Math.random()-0.5)*0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    let changePercent = ((avg-startPrice)/startPrice*100).toFixed(2);
+    document.getElementById("result").innerText = 
+      `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
+
+    // Line chart
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day=0; day<days; day++) {
+      let randomShock = (Math.random()-0.5)*0.02;
+      price *= (1 + randomShock);
+      sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data:{labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}]},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max-min)/bins.length;
+    results.forEach(val=>{
+      let idx = Math.floor((val-min)/binWidth);
+      if(idx>=bins.length) idx=bins.length-1;
+      bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min+i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{labels:labels, datasets:[{label:'Simulation Distribution (£)', data:bins, backgroundColor:'#38bdf8'}]},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+  }
+
+  function runCompound() {
+    let principal = parseFloat(document.getElementById("ciPrincipal").value);
+    let rate = parseFloat(document.getElementById("ciRate").value)/100;
+    let years = parseInt(document.getElementById("ciYears").value);
+    let amount = principal * Math.pow((1+rate), years);
+    document.getElementById("compoundResult").innerText =
+      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
+  }
+
+  const sections = document.querySelectorAll("section");
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  });
+  sections.forEach(section=>observer.observe(section));
+</script>
+
+</body>
+</html>
+
+On Sat, 14 Feb 2026, 10:46 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      padding: 60px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s ease forwards;
+    }
+
+    h1 { font-size: 40px; margin-bottom: 10px; }
+    nav a { margin: 0 10px; text-decoration: none; color: #38bdf8; font-weight: bold; }
+    section { padding: 50px 20px; max-width: 900px; margin: auto; opacity: 0; transform: translateY(20px); transition: all 0.8s ease; }
+    section.visible { opacity: 1; transform: translateY(0); }
+
+    .card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; }
+    button { background: #38bdf8; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
+
+    footer { text-align: center; padding: 30px; color: #64748b; }
+
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Responsive for phones */
+    @media (max-width: 600px) {
+      h1 { font-size: 28px; }
+      nav a { display: block; margin: 5px 0; }
+      .card { padding: 15px; }
+      input, textarea, button { font-size: 16px; }
+      canvas { width: 100% !important; height: auto !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Student quantitative research & modelling.</p>
+  <nav>
+    <a href="#projects">Projects</a>
+    <a href="#simulations">Simulations</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- Portfolio / Projects Section -->
+<section id="projects">
+  <h2>Portfolio / Projects</h2>
+  <div class="card">
+    <h3>Monte Carlo Risk Simulation</h3>
+    <p>Stock price modelling using random sampling. Interactive simulation available below.</p>
+  </div>
+  <div class="card">
+    <h3>Compound Interest Model</h3>
+    <p>Investment growth over time using compound interest. Interactive simulation available below.</p>
+  </div>
+  <div class="card">
+    <h3>Future Projects</h3>
+    <p>Other quant research projects, data science mini-projects, or coding experiments can go here.</p>
+  </div>
+</section>
+
+<!-- Simulations Section -->
+<section id="simulations">
+  <h2>Simulations</h2>
+
+  <!-- Monte Carlo Simulation -->
+  <div class="card">
+    <h3>Monte Carlo Risk Simulation</h3>
+    <p>Simulates stock prices using random sampling.</p>
+    <input type="number" id="mcStartPrice" placeholder="Start Price (£)" value="100">
+    <input type="number" id="mcDays" placeholder="Trading Days" value="252">
+    <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
+    <canvas id="mcChart" width="400" height="200"></canvas>
+    <canvas id="mcHistogram" width="400" height="200"></canvas>
+  </div>
+
+  <!-- Compound Interest Simulation -->
+  <div class="card">
+    <h3>Compound Interest Growth Model</h3>
+    <p>Simulates long-term investment growth.</p>
+    <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
+    <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
+    <input type="number" id="ciYears" placeholder="Years" value="20">
+    <button onclick="runCompound()">Run Growth Simulation</button>
+    <p id="compoundResult"></p>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  // Monte Carlo Simulation
+  function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+    for (let i = 0; i < simulations; i++) {
+      let price = startPrice;
+      for (let day = 0; day < days; day++) {
+        let randomShock = (Math.random() - 0.5) * 0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    let changePercent = ((avg - startPrice)/startPrice*100).toFixed(2);
+    document.getElementById("result").innerText = 
+      `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
+
+    // Line chart
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day = 0; day < days; day++) {
+      let randomShock = (Math.random() - 0.5) * 0.02;
+      price *= (1 + randomShock);
+      sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data:{ labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data: sample, borderColor:'#38bdf8', borderWidth:2}] },
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max - min)/bins.length;
+    results.forEach(val=>{
+      let idx = Math.floor((val-min)/binWidth);
+      if(idx>=bins.length) idx=bins.length-1;
+      bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min + i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{ labels:labels, datasets:[{label:'Simulation Outcome Distribution (£)', data:bins, backgroundColor:'#38bdf8'}]},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+  }
+
+  // Compound Interest Simulation
+  function runCompound() {
+    let principal = parseFloat(document.getElementById("ciPrincipal").value);
+    let rate = parseFloat(document.getElementById("ciRate").value)/100;
+    let years = parseInt(document.getElementById("ciYears").value);
+
+    let amount = principal * Math.pow((1+rate), years);
+    document.getElementById("compoundResult").innerText =
+      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
+  }
+
+  // Scroll animations
+  const sections = document.querySelectorAll("section");
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  });
+  sections.forEach(section=>observer.observe(section));
+</script>
+
+</body>
+</html>
+
+On Sat, 14 Feb 2026, 10:32 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      padding: 80px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s ease forwards;
+    }
+
+    h1 { font-size: 48px; margin-bottom: 10px; }
+    nav a { margin: 0 15px; text-decoration: none; color: #38bdf8; font-weight: bold; }
+    section { padding: 60px 20px; max-width: 900px; margin: auto; opacity:0; transform: translateY(20px); transition: all 0.8s ease; }
+    section.visible { opacity:1; transform: translateY(0); }
+
+    .card { background: #1e293b; padding: 25px; border-radius: 12px; margin: 20px 0; }
+    button { background: #38bdf8; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
+
+    footer { text-align: center; padding: 40px; color: #64748b; }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Student quantitative research & modelling.</p>
+  <nav>
+    <a href="#project">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="project">
+  <h2>Monte Carlo Risk Simulation</h2>
+  <div class="card">
+    <p>Simulates stock prices using random sampling.</p>
+    <input type="number" id="mcStartPrice" placeholder="Start Price (£)" value="100">
+    <input type="number" id="mcDays" placeholder="Trading Days" value="252">
+    <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
+    <canvas id="mcChart" width="400" height="200"></canvas>
+    <canvas id="mcHistogram" width="400" height="200"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Compound Interest Growth Model</h3>
+    <p>Simulates long-term investment growth.</p>
+    <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
+    <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
+    <input type="number" id="ciYears" placeholder="Years" value="20">
+    <button onclick="runCompound()">Run Growth Simulation</button>
+    <p id="compoundResult"></p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <!-- Replace action URL with your Formspree link -->
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  // Monte Carlo Simulation
+  function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+
+    for (let i = 0; i < simulations; i++) {
+      let price = startPrice;
+      for (let day = 0; day < days; day++) {
+        let randomShock = (Math.random() - 0.5) * 0.02; // daily ±1%
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    let changePercent = ((avg - startPrice)/startPrice*100).toFixed(2);
+    document.getElementById("result").innerText = 
+        `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
+
+    // Line chart (first simulation)
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day = 0; day < days; day++) {
+      let randomShock = (Math.random() - 0.5) * 0.02;
+      price *= (1 + randomShock);
+      sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data: { labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}] },
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max - min)/bins.length;
+    results.forEach(val=>{
+        let idx = Math.floor((val-min)/binWidth);
+        if(idx>=bins.length) idx=bins.length-1;
+        bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min + i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{labels:labels,datasets:[{label:'Simulation Outcome Distribution (£)',data:bins,backgroundColor:'#38bdf8'}]},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+  }
+
+  // Compound Interest Simulation
+  function runCompound() {
+    let principal = parseFloat(document.getElementById("ciPrincipal").value);
+    let rate = parseFloat(document.getElementById("ciRate").value)/100;
+    let years = parseInt(document.getElementById("ciYears").value);
+
+    let amount = principal * Math.pow((1+rate), years);
+    document.getElementById("compoundResult").innerText =
+      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
+  }
+
+  // Scroll animations
+  const sections = document.querySelectorAll("section");
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  });
+  sections.forEach(section=>observer.observe(section));
+</script>
+
+</body>
+</html>
+
+On Sat, 14 Feb 2026, 10:28 Dan, <danieldgschofield@gmail.com> wrote:
+function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+
+    for (let i = 0; i < simulations; i++) {
+        let price = startPrice;
+        for (let day = 0; day < days; day++) {
+            let randomShock = (Math.random() - 0.5) * 0.02; // daily ±1%
+            price *= (1 + randomShock);
+        }
+        results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    let changePercent = ((avg - startPrice)/startPrice*100).toFixed(2);
+    document.getElementById("result").innerText = 
+        `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
+
+    // Line chart (first simulation)
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day = 0; day < days; day++) {
+        let randomShock = (Math.random() - 0.5) * 0.02;
+        price *= (1 + randomShock);
+        sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data: { labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}] },
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max - min)/bins.length;
+    results.forEach(val=>{
+        let idx = Math.floor((val-min)/binWidth);
+        if(idx>=bins.length) idx=bins.length-1;
+        bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min + i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{labels:labels,datasets:[{label:'Simulation Outcome Distribution (£)',data:bins,backgroundColor:'#38bdf8'}]},
+      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
+    });
+}
+
+// Compound Interest
+function runCompound() {
+    let principal = parseFloat(document.getElementById("ciPrincipal").value);
+    let rate = parseFloat(document.getElementById("ciRate").value)/100;
+    let years = parseInt(document.getElementById("ciYears").value);
+
+    let amount = principal * Math.pow((1+rate), years);
+    document.getElementById("compoundResult").innerText =
+      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
+}
+
+On Sat, 14 Feb 2026, 10:22 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      padding: 80px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s ease forwards;
+    }
+
+    h1 { font-size: 48px; margin-bottom: 10px; }
+    nav a { margin: 0 15px; text-decoration: none; color: #38bdf8; font-weight: bold; }
+    section { padding: 60px 20px; max-width: 900px; margin: auto; opacity:0; transform: translateY(20px); transition: all 0.8s ease; }
+    section.visible { opacity:1; transform: translateY(0); }
+
+    .card { background: #1e293b; padding: 25px; border-radius: 12px; margin: 20px 0; }
+    button { background: #38bdf8; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
+
+    footer { text-align: center; padding: 40px; color: #64748b; }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Student quantitative research & modelling.</p>
+  <nav>
+    <a href="#project">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="project">
+  <h2>Monte Carlo Risk Simulation</h2>
+  <div class="card">
+    <p>Simulates stock prices using random sampling.</p>
+    <input type="number" id="mcStartPrice" placeholder="Start Price ($)" value="100">
+    <input type="number" id="mcDays" placeholder="Trading Days" value="252">
+    <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
+    <canvas id="mcChart" width="400" height="200"></canvas>
+    <canvas id="mcHistogram" width="400" height="200"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Compound Interest Growth Model</h3>
+    <p>Simulates long-term investment growth.</p>
+    <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
+    <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
+    <input type="number" id="ciYears" placeholder="Years" value="20">
+    <button onclick="runCompound()">Run Growth Simulation</button>
+    <p id="compoundResult"></p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <!-- Replace action URL with your Formspree link -->
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  // Monte Carlo Simulation
+  function runSimulation() {
+    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
+    let days = parseInt(document.getElementById("mcDays").value);
+    let simulations = parseInt(document.getElementById("mcSimulations").value);
+
+    let results = [];
+
+    for (let i = 0; i < simulations; i++) {
+      let price = startPrice;
+      for (let day = 0; day < days; day++) {
+        let randomShock = (Math.random() - 0.5) * 0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a,b)=>a+b)/simulations;
+    document.getElementById("result").innerText = 
+      "Average simulated price after " + days + " days: $" + avg.toFixed(2);
+
+    // Line chart (first simulation)
+    let ctx = document.getElementById('mcChart').getContext('2d');
+    let sample = [startPrice];
+    let price = startPrice;
+    for (let day = 0; day < days; day++) {
+      let randomShock = (Math.random() - 0.5) * 0.02;
+      price *= (1 + randomShock);
+      sample.push(price);
+    }
+    if(window.mcLineChart) window.mcLineChart.destroy();
+    window.mcLineChart = new Chart(ctx, {
+      type:'line',
+      data: { labels: sample.map((_,i)=>i), datasets:[{label:'Sample Simulation', data:sample, borderColor:'#38bdf8', borderWidth:2}] },
+      options:{responsive:true}
+    });
+
+    // Histogram
+    let bins = new Array(20).fill(0);
+    let min = Math.min(...results);
+    let max = Math.max(...results);
+    let binWidth = (max - min)/bins.length;
+    results.forEach(val=>{
+      let idx = Math.floor((val-min)/binWidth);
+      if(idx>=bins.length) idx=bins.length-1;
+      bins[idx]++;
+    });
+    let labels = bins.map((_,i)=>(min + i*binWidth).toFixed(2));
+    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
+    if(window.mcHistChart) window.mcHistChart.destroy();
+    window.mcHistChart = new Chart(ctxHist,{
+      type:'bar',
+      data:{labels:labels,datasets:[{label:'Distribution',data:bins,backgroundColor:'#38bdf8'}]},
+      options:{responsive:true}
+    });
+  }
+
+  // Compound Interest Simulation
+  function runCompound() {
+    let principal = parseFloat(document.getElementById("ciPrincipal").value);
+    let rate = parseFloat(document.getElementById("ciRate").value)/100;
+    let years = parseInt(document.getElementById("ciYears").value);
+
+    let amount = principal * Math.pow((1+rate), years);
+    document.getElementById("compoundResult").innerText =
+      "£" + principal + " invested at " + (rate*100).toFixed(2) + "% for " + years + " years grows to: £" + amount.toFixed(2);
+  }
+
+  // Scroll animations
+  const sections = document.querySelectorAll("section");
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  });
+  sections.forEach(section=>observer.observe(section));
+</script>
+
+</body>
+</html>
+
+On Sat, 14 Feb 2026, 10:14 Dan, <danieldgschofield@gmail.com> wrote:
+function runCompound() {
+  let principal = 1000;
+  let rate = 0.07; // 7% yearly return
+  let years = 20;
+
+  let amount = principal * Math.pow((1 + rate), years);
+
+  document.getElementById("compoundResult").innerText =
+    "£" + principal + " invested at 7% for 20 years grows to: £" + amount.toFixed(2);
+}
+
+On Sat, 14 Feb 2026, 10:13 Dan, <danieldgschofield@gmail.com> wrote:
+<div class="card">
+  <h3>Compound Interest Growth Model</h3>
+  <p>Simulates long-term growth using compound interest.</p>
+  <button onclick="runCompound()">Run Growth Simulation</button>
+  <p id="compoundResult"></p>
+</div>
+
+On Sat, 14 Feb 2026, 10:09 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QuantLab</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e2e8f0;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      padding: 80px 20px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s ease forwards;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    section {
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: auto;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    button {
+      background: #38bdf8;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Student quantitative research & modelling.</p>
+  <nav>
+    <a href="#project">Project</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="project">
+  <h2>Monte Carlo Risk Simulation</h2>
+  <div class="card">
+    <p>This simulation models 1-year stock price outcomes using random sampling.</p>
+    <button onclick="runSimulation()">Run Simulation</button>
+    <p id="result"></p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <!-- Replace action URL with your Formspree link later -->
+    <form action="https://formspree.io/f/yourcode" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+<script>
+  function runSimulation() {
+    let startPrice = 100;
+    let simulations = 1000;
+    let results = [];
+
+    for (let i = 0; i < simulations; i++) {
+      let price = startPrice;
+      for (let day = 0; day < 252; day++) {
+        let randomShock = (Math.random() - 0.5) * 0.02;
+        price *= (1 + randomShock);
+      }
+      results.push(price);
+    }
+
+    let avg = results.reduce((a, b) => a + b) / simulations;
+    document.getElementById("result").innerText =
+      "Average simulated price after 1 year: $" + avg.toFixed(2);
+  }
+
+  // Scroll animation
+  const sections = document.querySelectorAll("section");
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  });
+
+  sections.forEach(section => {
+    observer.observe(section);
+  });
+</script>
+
+</body>
+</html>
+
+On Sat, 14 Feb 2026, 10:02 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QuantLab</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      padding: 60px 20px;
+    }
+
+    h1 {
+      font-size: 50px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 20px;
+      color: #94a3b8;
+    }
+
+    nav {
+      margin-top: 30px;
+    }
+
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    section {
+      padding: 60px 20px;
+    }
+
+    .card {
+      background-color: #1e293b;
+      margin: 20px auto;
+      padding: 20px;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 10px;
+    }
+
+    footer {
+      padding: 30px;
+      font-size: 14px;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>QuantLab</h1>
+  <p>Student-built quantitative research & problem solving.</p>
+
+  <nav>
+    <a href="#about">About</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="about">
+  <h2>About</h2>
+  <div class="card">
+    <p>QuantLab is a student-led initiative focused on mathematics, modelling, and analytical thinking. Built to explore real-world quantitative problems from a young age.</p>
+  </div>
+</section>
+
+<section id="projects">
+  <h2>Projects</h2>
+
+  <div class="card">
+    <h3>Actuarial Risk Model</h3>
+    <p>Building probability-based models to simulate financial risk.</p>
+  </div>
+
+  <div class="card">
+    <h3>Geometry Research</h3>
+    <p>Exploring geometric optimisation and real-world applications.</p>
+  </div>
+
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <div class="card">
+    <p>Email coming soon.</p>
+  </div>
+</section>
+
+<footer>
+  © 2026 QuantLab | Built by Dan
+</footer>
+
+</body>
+</html>
+
+On Fri, 13 Feb 2026, 22:17 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QuantLab</title>
+</head>
+<body>
+    <h1>Welcome to QuantLab</h1>
+    <p>This is my personal quantitative research space.</p>
+
+    <h2>Projects</h2>
+    <ul>
+        <li>Coming soon...</li>
+    </ul>
