@@ -1,4 +1,189 @@
- <!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuantLab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    font-family:Arial;
+    background:#0b0f14;
+    color:white;
+    margin:0;
+}
+
+nav{
+    background:#111821;
+    padding:15px;
+    position:sticky;
+    top:0;
+}
+
+nav a{
+    color:white;
+    margin-right:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+section{
+    padding:40px;
+}
+
+.card{
+    background:#111821;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+}
+
+input{
+    padding:8px;
+    margin:5px;
+    width:120px;
+}
+
+button{
+    padding:8px 14px;
+    background:#1f6feb;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+canvas{
+    background:white;
+    border-radius:10px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<a href="#interest">Interest</a>
+<a href="#risk">Risk</a>
+<a href="#monte">Monte Carlo</a>
+<a href="#contact">Contact</a>
+</nav>
+
+<!-- INTEREST -->
+<section id="interest">
+<h2>Compound Interest Simulator</h2>
+<div class="card">
+£ <input id="start" value="1000">
+% <input id="rate" value="7">
+Years <input id="years" value="20">
+<button onclick="interest()">Run</button>
+<canvas id="interestChart"></canvas>
+</div>
+</section>
+
+<!-- RISK -->
+<section id="risk">
+<h2>Risk vs Return</h2>
+<div class="card">
+Return % <input id="ret" value="8">
+Risk % <input id="vol" value="15">
+<button onclick="risk()">Simulate</button>
+<canvas id="riskChart"></canvas>
+</div>
+</section>
+
+<!-- MONTE CARLO -->
+<section id="monte">
+<h2>Monte Carlo Price Simulation</h2>
+<div class="card">
+Price £ <input id="price" value="100">
+Volatility % <input id="v" value="20">
+Days <input id="days" value="252">
+<button onclick="monte()">Run Simulation</button>
+<canvas id="monteChart"></canvas>
+</div>
+</section>
+
+<section id="contact">
+<h2>Contact</h2>
+<div class="card">
+Email coming soon
+</div>
+</section>
+
+<script>
+
+// INTEREST
+let interestChart;
+function interest(){
+let p=+start.value;
+let r=rate.value/100;
+let y=+years.value;
+
+let data=[p];
+for(let i=1;i<=y;i++){
+p=p*(1+r);
+data.push(p);
+}
+
+if(interestChart)interestChart.destroy();
+interestChart=new Chart(interestChart=document.getElementById("interestChart"),{
+type:"line",
+data:{labels:data.map((_,i)=>i),
+datasets:[{label:"£ Value",data:data}]}
+});
+}
+
+// RISK
+let riskChart;
+function risk(){
+let r=ret.value/100;
+let v=vol.value/100;
+
+let results=[];
+for(let i=0;i<200;i++){
+let rand=(Math.random()*2-1)*v+r;
+results.push(rand*100);
+}
+
+if(riskChart)riskChart.destroy();
+riskChart=new Chart(document.getElementById("riskChart"),{
+type:"bar",
+data:{labels:results.map((_,i)=>i),
+datasets:[{label:"Return %",data:results}]}
+});
+}
+
+// MONTE CARLO
+let monteChart;
+function monte(){
+let price=+document.getElementById("price").value;
+let vol=v.value/100;
+let days=+document.getElementById("days").value;
+
+let data=[price];
+
+for(let i=1;i<days;i++){
+let shock=(Math.random()-0.5)*vol;
+price=price*(1+shock);
+data.push(price);
+}
+
+if(monteChart)monteChart.destroy();
+monteChart=new Chart(document.getElementById("monteChart"),{
+type:"line",
+data:{labels:data.map((_,i)=>i),
+datasets:[{label:"Simulated Price £",data:data}]}
+});
+}
+
+</script>
+
+</body>
+</html>
+
+On Sun, 15 Feb 2026, 21:34 Dan, <danieldgschofield@gmail.com> wrote:
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>QuantLab Research Lab</title>
@@ -577,7 +762,7 @@ On Sat, 14 Feb 2026, 10:53 Dan, <danieldgschofield@gmail.com> wrote:
     <h3>Compound Interest Growth Model</h3>
     <p>Investment growth over time using compound interest. Interactive simulation below!</p>
   </div>
- <div class="card">
+  <div class="card">
     <h3>Future Projects</h3>
     <p>Other quant research projects, coding experiments, or data science mini-projects will go here.</p>
   </div>
@@ -1328,312 +1513,3 @@ On Sat, 14 Feb 2026, 10:22 Dan, <danieldgschofield@gmail.com> wrote:
 
 </body>
 </html>
-
-On Sat, 14 Feb 2026, 10:14 Dan, <danieldgschofield@gmail.com> wrote:
-function runCompound() {
-  let principal = 1000;
-  let rate = 0.07; // 7% yearly return
-  let years = 20;
-
-  let amount = principal * Math.pow((1 + rate), years);
-
-  document.getElementById("compoundResult").innerText =
-    "£" + principal + " invested at 7% for 20 years grows to: £" + amount.toFixed(2);
-}
-
-On Sat, 14 Feb 2026, 10:13 Dan, <danieldgschofield@gmail.com> wrote:
-<div class="card">
-  <h3>Compound Interest Growth Model</h3>
-  <p>Simulates long-term growth using compound interest.</p>
-  <button onclick="runCompound()">Run Growth Simulation</button>
-  <p id="compoundResult"></p>
-</div>
-
-On Sat, 14 Feb 2026, 10:09 Dan, <danieldgschofield@gmail.com> wrote:
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>QuantLab</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1220;
-      color: #e2e8f0;
-      scroll-behavior: smooth;
-    }
-
-    header {
-      padding: 80px 20px;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 1s ease forwards;
-    }
-
-    h1 {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-
-    nav a {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #38bdf8;
-      font-weight: bold;
-    }
-
-    section {
-      padding: 60px 20px;
-      max-width: 800px;
-      margin: auto;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.8s ease;
-    }
-
-    section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .card {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 12px;
-      margin: 20px 0;
-    }
-
-    button {
-      background: #38bdf8;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: none;
-    }
-
-    footer {
-      text-align: center;
-      padding: 40px;
-      color: #64748b;
-    }
-
-    @keyframes fadeUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-<header>
-  <h1>QuantLab</h1>
-  <p>Student quantitative research & modelling.</p>
-  <nav>
-    <a href="#project">Project</a>
-    <a href="#contact">Contact</a>
-  </nav>
-</header>
-
-<section id="project">
-  <h2>Monte Carlo Risk Simulation</h2>
-  <div class="card">
-    <p>This simulation models 1-year stock price outcomes using random sampling.</p>
-    <button onclick="runSimulation()">Run Simulation</button>
-    <p id="result"></p>
-  </div>
-</section>
-
-<section id="contact">
-  <h2>Contact</h2>
-  <div class="card">
-    <!-- Replace action URL with your Formspree link later -->
-    <form action="https://formspree.io/f/yourcode" method="POST">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="email" name="email" placeholder="Your Email" required>
-      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
-      <button type="submit">Send Message</button>
-    </form>
-  </div>
-</section>
-
-<footer>
-  © 2026 QuantLab | Built by Dan
-</footer>
-
-<script>
-  function runSimulation() {
-    let startPrice = 100;
-    let simulations = 1000;
-    let results = [];
-
-    for (let i = 0; i < simulations; i++) {
-      let price = startPrice;
-      for (let day = 0; day < 252; day++) {
-        let randomShock = (Math.random() - 0.5) * 0.02;
-        price *= (1 + randomShock);
-      }
-      results.push(price);
-    }
-
-    let avg = results.reduce((a, b) => a + b) / simulations;
-    document.getElementById("result").innerText =
-      "Average simulated price after 1 year: $" + avg.toFixed(2);
-  }
-
-  // Scroll animation
-  const sections = document.querySelectorAll("section");
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-      }
-    });
-  });
-
-  sections.forEach(section => {
-    observer.observe(section);
-  });
-</script>
-
-</body>
-</html>
-
-On Sat, 14 Feb 2026, 10:02 Dan, <danieldgschofield@gmail.com> wrote:
-<!DOCTYPE html>
-<html>
-<head>
-  <title>QuantLab</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #0f172a;
-      color: white;
-      text-align: center;
-    }
-
-    header {
-      padding: 60px 20px;
-    }
-
-    h1 {
-      font-size: 50px;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 20px;
-      color: #94a3b8;
-    }
-
-    nav {
-      margin-top: 30px;
-    }
-
-    nav a {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #38bdf8;
-      font-weight: bold;
-    }
-
-    section {
-      padding: 60px 20px;
-    }
-
-    .card {
-      background-color: #1e293b;
-      margin: 20px auto;
-      padding: 20px;
-      width: 80%;
-      max-width: 600px;
-      border-radius: 10px;
-    }
-
-    footer {
-      padding: 30px;
-      font-size: 14px;
-      color: #64748b;
-    }
-  </style>
-</head>
-
-<body>
-
-<header>
-  <h1>QuantLab</h1>
-  <p>Student-built quantitative research & problem solving.</p>
-
-  <nav>
-    <a href="#about">About</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-  </nav>
-</header>
-
-<section id="about">
-  <h2>About</h2>
-  <div class="card">
-    <p>QuantLab is a student-led initiative focused on mathematics, modelling, and analytical thinking. Built to explore real-world quantitative problems from a young age.</p>
-  </div>
-</section>
-
-<section id="projects">
-  <h2>Projects</h2>
-
-  <div class="card">
-    <h3>Actuarial Risk Model</h3>
-    <p>Building probability-based models to simulate financial risk.</p>
-  </div>
-
-  <div class="card">
-    <h3>Geometry Research</h3>
-    <p>Exploring geometric optimisation and real-world applications.</p>
-  </div>
-
-</section>
-
-<section id="contact">
-  <h2>Contact</h2>
-  <div class="card">
-    <p>Email coming soon.</p>
-  </div>
-</section>
-
-<footer>
-  © 2026 QuantLab | Built by Dan
-</footer>
-
-</body>
-</html>
-
-On Fri, 13 Feb 2026, 22:17 Dan, <danieldgschofield@gmail.com> wrote:
-<!DOCTYPE html>
-<html>
-<head>
-    <title>QuantLab</title>
-</head>
-<body>
-    <h1>Welcome to QuantLab</h1>
-    <p>This is my personal quantitative research space.</p>
-
-    <h2>Projects</h2>
-    <ul>
-        <li>Coming soon...</li>
-    </ul>
