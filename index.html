@@ -1,3 +1,392 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuantLab Research Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:Arial,sans-serif;background:#0b0f14;color:white;margin:0;}
+nav{background:#111821;padding:15px;position:sticky;top:0;}
+nav a{color:white;margin-right:20px;text-decoration:none;font-weight:bold;}
+section{padding:40px;max-width:1000px;margin:auto;}
+.card{background:#111821;padding:20px;margin:20px 0;border-radius:12px;}
+input{padding:8px;margin:5px;width:120px;}
+button{padding:8px 14px;background:#1f6feb;color:white;border:none;border-radius:6px;cursor:pointer;}
+canvas{background:white;border-radius:10px;margin-top:20px;}
+</style>
+</head>
+<body><nav>
+<a href="#interest">Interest</a>
+<a href="#risk">Risk</a>
+<a href="#monte">Monte Carlo</a>
+<a href="#strategy">Strategies</a>
+<a href="#historical">Historical</a>
+<a href="#projects">Projects</a>
+<a href="#contact">Contact</a>
+</nav><!-- INTEREST --><section id="interest">
+<h2>Compound Interest Simulator</h2>
+<div class="card">
+£ <input id="start" value="1000">
+% <input id="rate" value="7">
+Years <input id="years" value="20">
+<button onclick="interest()">Run</button>
+<canvas id="interestChart"></canvas>
+</div>
+</section><!-- RISK --><section id="risk">
+<h2>Risk vs Return</h2>
+<div class="card">
+Return % <input id="ret" value="8">
+Risk % <input id="vol" value="15">
+<button onclick="risk()">Simulate</button>
+<canvas id="riskChart"></canvas>
+</div>
+</section><!-- MONTE CARLO --><section id="monte">
+<h2>Monte Carlo Price Simulation</h2>
+<div class="card">
+Price £ <input id="price" value="100">
+Volatility % <input id="v" value="20">
+Days <input id="days" value="252">
+<button onclick="monte()">Run Simulation</button>
+<canvas id="monteChart"></canvas>
+</div>
+</section><!-- STRATEGY --><section id="strategy">
+<h2>Trading Strategy Comparison</h2>
+<div class="card">
+Principal £ <input id="principal" value="1000">
+Annual Return % <input id="sRate" value="7">
+Years <input id="sYears" value="20">
+<button onclick="runStrategies()">Compare</button>
+<canvas id="strategyChart"></canvas>
+<table id="strategyResults" style="width:100%;margin-top:20px;color:white;"></table>
+</div>
+</section><!-- HISTORICAL MARKET TRENDS --><section id="historical">
+<h2>Historical Market Trends</h2>
+<div class="card">
+<p>Upload a CSV file named <b>market.csv</b> with Date,Price columns to show your own data, or default sample will display.</p>
+<canvas id="historyChart"></canvas>
+</div>
+</section><!-- PROJECTS --><section id="projects">
+<h2>Portfolio / Projects</h2>
+<div class="card">
+<p>Placeholder for your experiments, analyses, or notes.</p>
+</div>
+</section><!-- CONTACT --><section id="contact">
+<h2>Contact</h2>
+<div class="card">
+Email coming soon
+</div>
+</section><footer style="text-align:center;padding:30px;color:#64748b;">© 2026 QuantLab - Built by Dan</footer><script>
+// -------------------- INTEREST --------------------
+let interestChart;
+function interest(){
+    let p=+start.value,r=rate.value/100,y=+years.value,data=[p];
+    for(let i=1;i<=y;i++){p=p*(1+r);data.push(p);}
+    if(interestChart)interestChart.destroy();
+    interestChart=new Chart(document.getElementById("interestChart"),{type:"line",data:{labels:data.map((_,i)=>i),datasets:[{label:"£ Value",data:data}]},options:{responsive:true}});
+}
+
+// -------------------- RISK --------------------
+let riskChart;
+function risk(){
+    let r=ret.value/100,v=vol.value/100,results=[];
+    for(let i=0;i<200;i++){results.push((Math.random()*2-1)*v*100 + r*100);}
+    if(riskChart)riskChart.destroy();
+    riskChart=new Chart(document.getElementById("riskChart"),{type:"bar",data:{labels:results.map((_,i)=>i),datasets:[{label:"Return %",data:results}]},options:{responsive:true}});
+}
+
+// -------------------- MONTE CARLO --------------------
+let monteChart;
+function monte(){
+    let price=+document.getElementById("price").value,volv=v.value/100,days=+document.getElementById("days").value,data=[price];
+    for(let i=1;i<days;i++){let shock=(Math.random()-0.5)*volv;price=price*(1+shock);data.push(price);}
+    if(monteChart)monteChart.destroy();
+    monteChart=new Chart(document.getElementById("monteChart"),{type:"line",data:{labels:data.map((_,i)=>i),datasets:[{label:"Simulated Price £",data:data}]},options:{responsive:true}});
+}
+
+// -------------------- STRATEGY --------------------
+let strategyChart;
+function runStrategies(){
+    let P=+principal.value,r=sRate.value/100,y=+sYears.value;
+    let buyHold=[],DCA=[],cash=[];
+    for(let i=0;i<=y;i++){
+        buyHold.push(P*Math.pow(1+r,i));
+        DCA.push(P/y*i*Math.pow(1+r,i));
+        cash.push(P);
+    }
+    if(strategyChart)strategyChart.destroy();
+    strategyChart=new Chart(document.getElementById("strategyChart"),{
+        type:"line",
+        data:{
+            labels:buyHold.map((_,i)=>i),
+            datasets:[
+                {label:"Buy & Hold £",data:buyHold,borderColor:"#38bdf8"},
+                {label:"Dollar Cost Averaging £",data:DCA,borderColor:"#f59e0b"},
+                {label:"Cash £",data:cash,borderColor:"#ef4444"}
+            ]
+        },options:{responsive:true}
+    });
+
+    // Results table
+    let table=`<tr><th>Year</th><th>Buy & Hold £</th><th>DCA £</th><th>Cash £</th></tr>`;
+    for(let i=0;i<=y;i++){
+        table+=`<tr><td>${i}</td><td>${buyHold[i].toFixed(2)}</td><td>${DCA[i].toFixed(2)}</td><td>${cash[i].toFixed(2)}</td></tr>`;
+    }
+    document.getElementById("strategyResults").innerHTML=table;
+}
+
+// -------------------- HISTORICAL --------------------
+async function loadHistory(){
+    const canvas=document.getElementById("historyChart");
+    if(!canvas)return;
+    try{
+        const res=await fetch("market.csv");
+        let text="";
+        if(res.ok){text=await res.text();}
+        else{text=`Date,Price
+2020-01,3230
+2020-02,2970
+2020-03,2580
+2020-04,2910
+2020-05,3040`;}
+        const lines=text.trim().split("\n");
+        let labels=[],prices=[];
+        for(let i=1;i<lines.length;i++){
+            const parts=lines[i].split(",");
+            if(parts.length!==2)continue;
+            labels.push(parts[0]);
+            prices.push(parseFloat(parts[1]));
+        }
+        new Chart(canvas,{type:"line",data:{labels,datasets:[{label:"Historical Price",data:prices,borderColor:"#38bdf8",tension:0.1}]},options:{responsive:true,animation:false}});
+    }catch(err){console.log("Historical market chart disabled:",err);}
+}
+window.addEventListener("load",loadHistory);
+</script></body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuantLab Research Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#0b0f14;
+    color:white;
+    margin:0;
+}
+nav{
+    background:#111821;
+    padding:15px;
+    position:sticky;
+    top:0;
+}
+nav a{
+    color:white;
+    margin-right:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+section{
+    padding:40px;
+    max-width:1000px;
+    margin:auto;
+}
+.card{
+    background:#111821;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+}
+input{
+    padding:8px;
+    margin:5px;
+    width:120px;
+}
+button{
+    padding:8px 14px;
+    background:#1f6feb;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+canvas{
+    background:white;
+    border-radius:10px;
+    margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<nav>
+<a href="#interest">Interest</a>
+<a href="#risk">Risk</a>
+<a href="#monte">Monte Carlo</a>
+<a href="#historical">Historical</a>
+<a href="#contact">Contact</a>
+</nav>
+
+<!-- INTEREST -->
+<section id="interest">
+<h2>Compound Interest Simulator</h2>
+<div class="card">
+£ <input id="start" value="1000">
+% <input id="rate" value="7">
+Years <input id="years" value="20">
+<button onclick="interest()">Run</button>
+<canvas id="interestChart"></canvas>
+</div>
+</section>
+
+<!-- RISK -->
+<section id="risk">
+<h2>Risk vs Return</h2>
+<div class="card">
+Return % <input id="ret" value="8">
+Risk % <input id="vol" value="15">
+<button onclick="risk()">Simulate</button>
+<canvas id="riskChart"></canvas>
+</div>
+</section>
+
+<!-- MONTE CARLO -->
+<section id="monte">
+<h2>Monte Carlo Price Simulation</h2>
+<div class="card">
+Price £ <input id="price" value="100">
+Volatility % <input id="v" value="20">
+Days <input id="days" value="252">
+<button onclick="monte()">Run Simulation</button>
+<canvas id="monteChart"></canvas>
+</div>
+</section>
+
+<!-- HISTORICAL MARKET TRENDS -->
+<section id="historical">
+<h2>Historical Market Trends</h2>
+<div class="card">
+<p>Upload a CSV file named <b>market.csv</b> with Date,Price columns to show your own data, or default sample will display.</p>
+<canvas id="historyChart"></canvas>
+</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+<h2>Contact</h2>
+<div class="card">
+Email coming soon
+</div>
+</section>
+
+<footer style="text-align:center;padding:30px;color:#64748b;">© 2026 QuantLab - Built by Dan</footer>
+
+<script>
+// -------------------- INTEREST --------------------
+let interestChart;
+function interest(){
+    let p = +start.value;
+    let r = rate.value/100;
+    let y = +years.value;
+    let data = [p];
+    for(let i=1;i<=y;i++){ p = p*(1+r); data.push(p);}
+    if(interestChart) interestChart.destroy();
+    interestChart = new Chart(document.getElementById("interestChart"),{
+        type:"line",
+        data:{labels:data.map((_,i)=>i), datasets:[{label:"£ Value",data:data}]},
+        options:{responsive:true}
+    });
+}
+
+// -------------------- RISK --------------------
+let riskChart;
+function risk(){
+    let r=ret.value/100;
+    let v=vol.value/100;
+    let results=[];
+    for(let i=0;i<200;i++){ results.push((Math.random()*2-1)*v*100 + r*100); }
+    if(riskChart) riskChart.destroy();
+    riskChart=new Chart(document.getElementById("riskChart"),{
+        type:"bar",
+        data:{labels:results.map((_,i)=>i), datasets:[{label:"Return %", data:results}]},
+        options:{responsive:true}
+    });
+}
+
+// -------------------- MONTE CARLO --------------------
+let monteChart;
+function monte(){
+    let price=+document.getElementById("price").value;
+    let volv=v.value/100;
+    let days=+document.getElementById("days").value;
+    let data=[price];
+    for(let i=1;i<days;i++){
+        let shock=(Math.random()-0.5)*volv;
+        price = price*(1+shock);
+        data.push(price);
+    }
+    if(monteChart) monteChart.destroy();
+    monteChart=new Chart(document.getElementById("monteChart"),{
+        type:"line",
+        data:{labels:data.map((_,i)=>i), datasets:[{label:"Simulated Price £", data:data}]},
+        options:{responsive:true}
+    });
+}
+
+// -------------------- HISTORICAL --------------------
+async function loadHistory(){
+    const canvas = document.getElementById("historyChart");
+    if(!canvas) return;
+    try{
+        const res = await fetch("market.csv");
+        let text = "";
+        if(res.ok){ text = await res.text(); } 
+        else {
+            // Default sample if CSV missing
+            text = `Date,Price
+2020-01,3230
+2020-02,2970
+2020-03,2580
+2020-04,2910
+2020-05,3040`;
+        }
+        const lines = text.trim().split("\n");
+        let labels=[], prices=[];
+        for(let i=1;i<lines.length;i++){
+            const parts=lines[i].split(",");
+            if(parts.length!==2) continue;
+            labels.push(parts[0]);
+            prices.push(parseFloat(parts[1]));
+        }
+        new Chart(canvas,{
+            type:"line",
+            data:{labels, datasets:[{label:"Historical Price", data:prices, borderColor:"#38bdf8", tension:0.1}]},
+            options:{responsive:true, animation:false}
+        });
+    } catch(err){
+        console.log("Historical market chart disabled:",err);
+    }
+}
+window.addEventListener("load", loadHistory);
+</script>
+
+</body>
+</html>
+
+2020-01,3230
+2020-02,2970
+2020-03,2580
+2020-04,2910
+2020-05,3040
+2020-06,3100
+2020-07,3270
+2020-08,3500
+2020-09,3360
+2020-10,3260
+2020-11,3620
+2020-12,3750
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -181,7 +570,6 @@ datasets:[{label:"Simulated Price £",data:data}]}
 
 </body>
 </html>
-
 
 <!DOCTYPE html><html lang="en">
 <head>
@@ -1238,270 +1626,3 @@ function runCompound(){
       options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
     });
   }
-
-  // Compound Interest Simulation
-  function runCompound() {
-    let principal = parseFloat(document.getElementById("ciPrincipal").value);
-    let rate = parseFloat(document.getElementById("ciRate").value)/100;
-    let years = parseInt(document.getElementById("ciYears").value);
-
-    let amount = principal * Math.pow((1+rate), years);
-    document.getElementById("compoundResult").innerText =
-      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
-  }
-
-  // Scroll animations
-  const sections = document.querySelectorAll("section");
-  const observer = new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting) entry.target.classList.add("visible");
-    });
-  });
-  sections.forEach(section=>observer.observe(section));
-</script>
-
-</body>
-</html>
-
-function runSimulation() {
-    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
-    let days = parseInt(document.getElementById("mcDays").value);
-    let simulations = parseInt(document.getElementById("mcSimulations").value);
-
-    let results = [];
-
-    for (let i = 0; i < simulations; i++) {
-        let price = startPrice;
-        for (let day = 0; day < days; day++) {
-            let randomShock = (Math.random() - 0.5) * 0.02; // daily ±1%
-            price *= (1 + randomShock);
-        }
-        results.push(price);
-    }
-
-    let avg = results.reduce((a,b)=>a+b)/simulations;
-    let changePercent = ((avg - startPrice)/startPrice*100).toFixed(2);
-    document.getElementById("result").innerText = 
-        `Starting £${startPrice.toFixed(2)}, average after ${days} days: £${avg.toFixed(2)} (${changePercent}%)`;
-
-    // Line chart (first simulation)
-    let ctx = document.getElementById('mcChart').getContext('2d');
-    let sample = [startPrice];
-    let price = startPrice;
-    for (let day = 0; day < days; day++) {
-        let randomShock = (Math.random() - 0.5) * 0.02;
-        price *= (1 + randomShock);
-        sample.push(price);
-    }
-    if(window.mcLineChart) window.mcLineChart.destroy();
-    window.mcLineChart = new Chart(ctx, {
-      type:'line',
-      data: { labels: sample.map((_,i)=>i+1), datasets:[{label:'Sample Simulation (£)', data:sample, borderColor:'#38bdf8', borderWidth:2}] },
-      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
-    });
-
-    // Histogram
-    let bins = new Array(20).fill(0);
-    let min = Math.min(...results);
-    let max = Math.max(...results);
-    let binWidth = (max - min)/bins.length;
-    results.forEach(val=>{
-        let idx = Math.floor((val-min)/binWidth);
-        if(idx>=bins.length) idx=bins.length-1;
-        bins[idx]++;
-    });
-    let labels = bins.map((_,i)=>(min + i*binWidth).toFixed(2));
-    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
-    if(window.mcHistChart) window.mcHistChart.destroy();
-    window.mcHistChart = new Chart(ctxHist,{
-      type:'bar',
-      data:{labels:labels,datasets:[{label:'Simulation Outcome Distribution (£)',data:bins,backgroundColor:'#38bdf8'}]},
-      options:{responsive:true, plugins:{legend:{labels:{color:'#e2e8f0'}}}}
-    });
-}
-
-// Compound Interest
-function runCompound() {
-    let principal = parseFloat(document.getElementById("ciPrincipal").value);
-    let rate = parseFloat(document.getElementById("ciRate").value)/100;
-    let years = parseInt(document.getElementById("ciYears").value);
-
-    let amount = principal * Math.pow((1+rate), years);
-    document.getElementById("compoundResult").innerText =
-      `£${principal.toFixed(2)} invested at ${(rate*100).toFixed(2)}% for ${years} years grows to: £${amount.toFixed(2)}`;
-}
-
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>QuantLab</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1220;
-      color: #e2e8f0;
-      scroll-behavior: smooth;
-    }
-
-    header {
-      padding: 80px 20px;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 1s ease forwards;
-    }
-
-    h1 { font-size: 48px; margin-bottom: 10px; }
-    nav a { margin: 0 15px; text-decoration: none; color: #38bdf8; font-weight: bold; }
-    section { padding: 60px 20px; max-width: 900px; margin: auto; opacity:0; transform: translateY(20px); transition: all 0.8s ease; }
-    section.visible { opacity:1; transform: translateY(0); }
-
-    .card { background: #1e293b; padding: 25px; border-radius: 12px; margin: 20px 0; }
-    button { background: #38bdf8; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0b1220; }
-    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; }
-
-    footer { text-align: center; padding: 40px; color: #64748b; }
-
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-
-<body>
-
-<header>
-  <h1>QuantLab</h1>
-  <p>Student quantitative research & modelling.</p>
-  <nav>
-    <a href="#project">Projects</a>
-    <a href="#contact">Contact</a>
-  </nav>
-</header>
-
-<section id="project">
-  <h2>Monte Carlo Risk Simulation</h2>
-  <div class="card">
-    <p>Simulates stock prices using random sampling.</p>
-    <input type="number" id="mcStartPrice" placeholder="Start Price ($)" value="100">
-    <input type="number" id="mcDays" placeholder="Trading Days" value="252">
-    <input type="number" id="mcSimulations" placeholder="Number of Simulations" value="1000">
-    <button onclick="runSimulation()">Run Simulation</button>
-    <p id="result"></p>
-    <canvas id="mcChart" width="400" height="200"></canvas>
-    <canvas id="mcHistogram" width="400" height="200"></canvas>
-  </div>
-
-  <div class="card">
-    <h3>Compound Interest Growth Model</h3>
-    <p>Simulates long-term investment growth.</p>
-    <input type="number" id="ciPrincipal" placeholder="Principal (£)" value="1000">
-    <input type="number" id="ciRate" placeholder="Annual Return (%)" value="7">
-    <input type="number" id="ciYears" placeholder="Years" value="20">
-    <button onclick="runCompound()">Run Growth Simulation</button>
-    <p id="compoundResult"></p>
-  </div>
-</section>
-
-<section id="contact">
-  <h2>Contact</h2>
-  <div class="card">
-    <!-- Replace action URL with your Formspree link -->
-    <form action="https://formspree.io/f/yourcode" method="POST">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="email" name="email" placeholder="Your Email" required>
-      <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
-      <button type="submit">Send Message</button>
-    </form>
-  </div>
-</section>
-
-<footer>
-  © 2026 QuantLab | Built by Dan
-</footer>
-
-<script>
-  // Monte Carlo Simulation
-  function runSimulation() {
-    let startPrice = parseFloat(document.getElementById("mcStartPrice").value);
-    let days = parseInt(document.getElementById("mcDays").value);
-    let simulations = parseInt(document.getElementById("mcSimulations").value);
-
-    let results = [];
-
-    for (let i = 0; i < simulations; i++) {
-      let price = startPrice;
-      for (let day = 0; day < days; day++) {
-        let randomShock = (Math.random() - 0.5) * 0.02;
-        price *= (1 + randomShock);
-      }
-      results.push(price);
-    }
-
-    let avg = results.reduce((a,b)=>a+b)/simulations;
-    document.getElementById("result").innerText = 
-      "Average simulated price after " + days + " days: $" + avg.toFixed(2);
-
-    // Line chart (first simulation)
-    let ctx = document.getElementById('mcChart').getContext('2d');
-    let sample = [startPrice];
-    let price = startPrice;
-    for (let day = 0; day < days; day++) {
-      let randomShock = (Math.random() - 0.5) * 0.02;
-      price *= (1 + randomShock);
-      sample.push(price);
-    }
-    if(window.mcLineChart) window.mcLineChart.destroy();
-    window.mcLineChart = new Chart(ctx, {
-      type:'line',
-      data: { labels: sample.map((_,i)=>i), datasets:[{label:'Sample Simulation', data:sample, borderColor:'#38bdf8', borderWidth:2}] },
-      options:{responsive:true}
-    });
-
-    // Histogram
-    let bins = new Array(20).fill(0);
-    let min = Math.min(...results);
-    let max = Math.max(...results);
-    let binWidth = (max - min)/bins.length;
-    results.forEach(val=>{
-      let idx = Math.floor((val-min)/binWidth);
-      if(idx>=bins.length) idx=bins.length-1;
-      bins[idx]++;
-    });
-    let labels = bins.map((_,i)=>(min + i*binWidth).toFixed(2));
-    let ctxHist = document.getElementById('mcHistogram').getContext('2d');
-    if(window.mcHistChart) window.mcHistChart.destroy();
-    window.mcHistChart = new Chart(ctxHist,{
-      type:'bar',
-      data:{labels:labels,datasets:[{label:'Distribution',data:bins,backgroundColor:'#38bdf8'}]},
-      options:{responsive:true}
-    });
-  }
-
-  // Compound Interest Simulation
-  function runCompound() {
-    let principal = parseFloat(document.getElementById("ciPrincipal").value);
-    let rate = parseFloat(document.getElementById("ciRate").value)/100;
-    let years = parseInt(document.getElementById("ciYears").value);
-
-    let amount = principal * Math.pow((1+rate), years);
-    document.getElementById("compoundResult").innerText =
-      "£" + principal + " invested at " + (rate*100).toFixed(2) + "% for " + years + " years grows to: £" + amount.toFixed(2);
-  }
-
-  // Scroll animations
-  const sections = document.querySelectorAll("section");
-  const observer = new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting) entry.target.classList.add("visible");
-    });
-  });
-  sections.forEach(section=>observer.observe(section));
-</script>
-
-</body>
-</html>
