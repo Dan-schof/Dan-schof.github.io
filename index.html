@@ -1,248 +1,344 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuantLab</title>
+<title>QuantLab | Quant Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#0b1f3a,#132f52,#1f4c7c);
+color:white;
 }
-header {
-    text-align: center;
-    padding: 30px;
-    font-size: 32px;
-    font-weight: bold;
+
+header{
+padding:20px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+letter-spacing:1px;
+background:rgba(0,0,0,0.3);
 }
-section {
-    padding: 40px 10%;
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
+gap:20px;
+padding:20px;
 }
-h2 {
-    border-bottom: 2px solid rgba(255,255,255,0.2);
-    padding-bottom: 10px;
+
+.card{
+background:rgba(255,255,255,0.06);
+padding:20px;
+border-radius:14px;
+box-shadow:0 0 15px rgba(0,0,0,0.3);
 }
-input, button {
-    padding: 8px;
-    margin: 5px;
-    border-radius: 6px;
-    border: none;
+
+h3{
+margin-top:0;
+border-bottom:1px solid rgba(255,255,255,0.2);
+padding-bottom:8px;
 }
-button {
-    background-color: #1e88e5;
-    color: white;
-    cursor: pointer;
+
+input,button{
+padding:6px;
+margin:4px;
+border:none;
+border-radius:6px;
 }
-button:hover {
-    background-color: #42a5f5;
+
+button{
+background:#2196f3;
+color:white;
+cursor:pointer;
 }
-canvas {
-    background: white;
-    border-radius: 10px;
-    padding: 10px;
+
+button:hover{
+background:#42a5f5;
 }
-.card {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 30px;
+
+canvas{
+background:white;
+border-radius:10px;
+padding:8px;
 }
-footer {
-    text-align: center;
-    padding: 20px;
-    background: rgba(0,0,0,0.3);
+
+.kpis{
+display:flex;
+justify-content:space-around;
+padding:15px;
+background:rgba(0,0,0,0.4);
+font-size:14px;
 }
-a { color: #90caf9; }
+
+.kpis div{
+text-align:center;
+}
+
+footer{
+text-align:center;
+padding:15px;
+background:rgba(0,0,0,0.4);
+}
 </style>
 </head>
 
 <body>
 
-<header>QuantLab</header>
+<header>QuantLab | Hedge Fund Style Dashboard</header>
 
-<section>
-<h2>Compound Interest Simulator</h2>
+<div class="kpis">
+<div>Sharpe: <span id="kpiSharpe">-</span></div>
+<div>Sortino: <span id="kpiSortino">-</span></div>
+<div>Max DD: <span id="kpiDD">-</span></div>
+<div>Return: <span id="kpiReturn">-</span></div>
+</div>
+
+<div class="dashboard">
+
+<!-- COMPOUND -->
 <div class="card">
-£ Initial: <input type="number" id="ciPrincipal" value="1000">
-Annual %: <input type="number" id="ciRate" value="7">
-Years: <input type="number" id="ciYears" value="20">
-<button onclick="calculateCompound()">Calculate</button>
+<h3>Compound Interest</h3>
+£ <input type="number" id="ciP" value="1000">
+% <input type="number" id="ciR" value="8">
+Years <input type="number" id="ciY" value="20">
+<button onclick="compound()">Run</button>
 <canvas id="compoundChart"></canvas>
 </div>
-</section>
 
-<section>
-<h2>Risk vs Return</h2>
+<!-- INFLATION -->
 <div class="card">
-<canvas id="riskReturnChart"></canvas>
+<h3>Inflation Adjusted</h3>
+£ <input type="number" id="infP" value="10000">
+Return % <input type="number" id="infR" value="8">
+Inflation % <input type="number" id="infI" value="3">
+Years <input type="number" id="infY" value="20">
+<button onclick="inflationCalc()">Run</button>
+<canvas id="inflationChart"></canvas>
 </div>
-</section>
 
-<section>
-<h2>Monte Carlo Price Simulation</h2>
+<!-- RATIOS -->
 <div class="card">
-£ Start Price: <input type="number" id="mcPrice" value="100">
-Annual % Return: <input type="number" id="mcReturn" value="8">
-Volatility %: <input type="number" id="mcVol" value="15">
-Years: <input type="number" id="mcYears" value="10">
-<button onclick="runMonteCarlo()">Simulate</button>
+<h3>Risk Ratios</h3>
+Return % <input type="number" id="ratR" value="10">
+Vol % <input type="number" id="ratV" value="15">
+Risk-Free % <input type="number" id="ratRf" value="2">
+Down Vol % <input type="number" id="ratDV" value="10">
+<button onclick="ratios()">Calculate</button>
+<canvas id="drawChart"></canvas>
+</div>
+
+<!-- MONTE CARLO -->
+<div class="card">
+<h3>Monte Carlo</h3>
+£ <input type="number" id="mcP" value="100">
+Return % <input type="number" id="mcR" value="8">
+Vol % <input type="number" id="mcV" value="20">
+Years <input type="number" id="mcY" value="15">
+<button onclick="monte()">Simulate</button>
 <canvas id="mcChart"></canvas>
 </div>
-</section>
 
-<section>
-<h2>Trading Strategy Comparison</h2>
+<!-- STRATEGY -->
 <div class="card">
-£ Initial: <input type="number" id="tsInitial" value="10000">
-Annual % Return: <input type="number" id="tsReturn" value="8">
-Years: <input type="number" id="tsYears" value="20">
-<button onclick="compareStrategies()">Compare</button>
-<canvas id="strategyChart"></canvas>
+<h3>Strategy Comparison</h3>
+£ <input type="number" id="stP" value="10000">
+Return % <input type="number" id="stR" value="8">
+Years <input type="number" id="stY" value="20">
+<button onclick="strategy()">Compare</button>
+<canvas id="stChart"></canvas>
 </div>
-</section>
 
-<section>
-<h2>Historical Market Simulation</h2>
+<!-- TRADING BOT -->
 <div class="card">
-<button onclick="generateHistorical()">Generate Data</button>
-<canvas id="historicalChart"></canvas>
+<h3>Moving Average Trading Bot</h3>
+£ <input type="number" id="botC" value="10000">
+<button onclick="bot()">Run Bot</button>
+<canvas id="botChart"></canvas>
 </div>
-</section>
 
-<section>
-<h2>Portfolio / Projects</h2>
+<!-- PORTFOLIO OPTIMISER -->
 <div class="card">
-<ul>
-<li>📈 Equity Backtesting Engine</li>
-<li>🤖 Algorithmic Trading Bot</li>
-<li>📊 Risk Analytics Dashboard</li>
-<li>💹 Portfolio Optimizer</li>
-</ul>
+<h3>Portfolio Optimiser</h3>
+A % <input type="number" id="r1" value="8">
+Vol % <input type="number" id="v1" value="15"><br>
+B % <input type="number" id="r2" value="12">
+Vol % <input type="number" id="v2" value="25"><br>
+C % <input type="number" id="r3" value="6">
+Vol % <input type="number" id="v3" value="10"><br>
+<button onclick="optimise()">Optimise</button>
+<canvas id="portChart"></canvas>
 </div>
-</section>
 
-<section>
-<h2>Contact</h2>
+<!-- RISK RETURN -->
 <div class="card">
-Email: <a href="mailto:danieldgschofield@gmail.com">danieldgschofield@gmail.com</a>
+<h3>Risk vs Return</h3>
+<canvas id="scatterChart"></canvas>
 </div>
-</section>
 
-<footer>© 2026 QuantLab</footer>
+</div>
+
+<footer>
+Contact: danieldgschofield@gmail.com
+</footer>
 
 <script>
-let compoundChart, mcChart, strategyChart, historicalChart;
+let charts={};
 
-function calculateCompound(){
-    let P = parseFloat(document.getElementById("ciPrincipal").value);
-    let r = parseFloat(document.getElementById("ciRate").value)/100;
-    let years = parseInt(document.getElementById("ciYears").value);
-    let labels=[], data=[];
-    for(let i=0;i<=years;i++){
-        labels.push(i);
-        data.push(P*Math.pow(1+r,i));
-    }
-    if(compoundChart) compoundChart.destroy();
-    compoundChart = new Chart(document.getElementById("compoundChart"), {
-        type:'line',
-        data:{labels:labels,
-            datasets:[{label:"Growth (£)", data:data, borderColor:'blue'}]
-        }
-    });
+/* COMPOUND */
+function compound(){
+let P=ciP.value;
+let r=ciR.value/100;
+let y=ciY.value;
+let data=[],labels=[];
+for(let i=0;i<=y;i++){
+labels.push(i);
+data.push(P*Math.pow(1+r,i));
+}
+if(charts.c)charts.c.destroy();
+charts.c=new Chart(compoundChart,{type:'line',
+data:{labels:labels,datasets:[{label:"£ Growth",data:data,borderColor:'blue'}]}});
 }
 
-function runMonteCarlo(){
-    let price=parseFloat(document.getElementById("mcPrice").value);
-    let r=parseFloat(document.getElementById("mcReturn").value)/100;
-    let vol=parseFloat(document.getElementById("mcVol").value)/100;
-    let years=parseInt(document.getElementById("mcYears").value);
-    let labels=[], data=[price];
-    for(let i=1;i<=years;i++){
-        let random = (Math.random()-0.5)*2;
-        price=price*(1+r+vol*random);
-        labels.push(i);
-        data.push(price);
-    }
-    if(mcChart) mcChart.destroy();
-    mcChart=new Chart(document.getElementById("mcChart"),{
-        type:'line',
-        data:{labels:labels,
-            datasets:[{label:"Simulated Price (£)", data:data, borderColor:'green'}]
-        }
-    });
+/* INFLATION */
+function inflationCalc(){
+let P=infP.value;
+let r=infR.value/100;
+let inf=infI.value/100;
+let y=infY.value;
+let n=[],real=[],labels=[];
+for(let i=0;i<=y;i++){
+labels.push(i);
+n.push(P*Math.pow(1+r,i));
+real.push(P*Math.pow((1+r)/(1+inf),i));
+}
+if(charts.i)charts.i.destroy();
+charts.i=new Chart(inflationChart,{type:'line',
+data:{labels:labels,datasets:[
+{label:"Nominal",data:n,borderColor:'blue'},
+{label:"Real",data:real,borderColor:'green'}]}});
 }
 
-function compareStrategies(){
-    let initial=parseFloat(document.getElementById("tsInitial").value);
-    let r=parseFloat(document.getElementById("tsReturn").value)/100;
-    let years=parseInt(document.getElementById("tsYears").value);
-    let labels=[], buyHold=[], dca=[], cash=[];
-    let bh=initial, dc=0, annualInvest=initial/years;
-    for(let i=0;i<=years;i++){
-        labels.push(i);
-        if(i>0){
-            bh=bh*(1+r);
-            dc=(dc+annualInvest)*(1+r);
-        }
-        buyHold.push(bh);
-        dca.push(dc);
-        cash.push(initial);
-    }
-    if(strategyChart) strategyChart.destroy();
-    strategyChart=new Chart(document.getElementById("strategyChart"),{
-        type:'line',
-        data:{labels:labels,
-            datasets:[
-                {label:"Buy & Hold", data:buyHold, borderColor:'blue'},
-                {label:"DCA", data:dca, borderColor:'orange'},
-                {label:"Cash", data:cash, borderColor:'red'}
-            ]
-        }
-    });
+/* RATIOS */
+function ratios(){
+let r=ratR.value/100;
+let v=ratV.value/100;
+let rf=ratRf.value/100;
+let dv=ratDV.value/100;
+let sharpe=(r-rf)/v;
+let sortino=(r-rf)/dv;
+
+document.getElementById("kpiSharpe").innerHTML=sharpe.toFixed(2);
+document.getElementById("kpiSortino").innerHTML=sortino.toFixed(2);
+document.getElementById("kpiReturn").innerHTML=(r*100).toFixed(1)+"%";
+
+let value=100,peak=100,maxDD=0,dd=[],labels=[];
+for(let i=0;i<100;i++){
+value*=1+(Math.random()-0.45)/8;
+peak=Math.max(peak,value);
+let draw=(value-peak)/peak;
+maxDD=Math.min(maxDD,draw);
+dd.push(draw*100);
+labels.push(i);
+}
+document.getElementById("kpiDD").innerHTML=(maxDD*100).toFixed(2)+"%";
+
+if(charts.d)charts.d.destroy();
+charts.d=new Chart(drawChart,{type:'line',
+data:{labels:labels,datasets:[{label:"Drawdown %",data:dd,borderColor:'red'}]}});
 }
 
-function generateHistorical(){
-    let labels=[], data=[], value=100;
-    for(let i=0;i<50;i++){
-        value*=1+(Math.random()-0.4)/10;
-        labels.push("Year "+i);
-        data.push(value);
-    }
-    if(historicalChart) historicalChart.destroy();
-    historicalChart=new Chart(document.getElementById("historicalChart"),{
-        type:'line',
-        data:{labels:labels,
-            datasets:[{label:"Market Index (£)", data:data, borderColor:'purple'}]
-        }
-    });
+/* MONTE */
+function monte(){
+let P=mcP.value;
+let r=mcR.value/100;
+let v=mcV.value/100;
+let y=mcY.value;
+let data=[P],labels=[];
+for(let i=1;i<=y;i++){
+P*=1+r+(Math.random()-0.5)*v;
+data.push(P);
+labels.push(i);
+}
+if(charts.m)charts.m.destroy();
+charts.m=new Chart(mcChart,{type:'line',
+data:{labels:labels,datasets:[{label:"Price",data:data,borderColor:'purple'}]}});
 }
 
-new Chart(document.getElementById("riskReturnChart"),{
-    type:'scatter',
-    data:{
-        datasets:[{
-            label:"Assets",
-            data:[
-                {x:5,y:4},{x:10,y:7},{x:15,y:12},{x:20,y:18}
-            ],
-            backgroundColor:'cyan'
-        }]
-    },
-    options:{
-        scales:{
-            x:{title:{display:true,text:"Risk %"}},
-            y:{title:{display:true,text:"Return %"}}
-        }
-    }
-});
+/* STRATEGY */
+function strategy(){
+let P=stP.value;
+let r=stR.value/100;
+let y=stY.value;
+let bh=P,dca=0,cash=P,labels=[],bhArr=[],dcaArr=[],cashArr=[];
+let invest=P/y;
+for(let i=0;i<=y;i++){
+labels.push(i);
+if(i>0){
+bh*=1+r;
+dca=(dca+invest)*(1+r);
+}
+bhArr.push(bh);
+dcaArr.push(dca);
+cashArr.push(cash);
+}
+if(charts.s)charts.s.destroy();
+charts.s=new Chart(stChart,{type:'line',
+data:{labels:labels,datasets:[
+{label:"BuyHold",data:bhArr,borderColor:'blue'},
+{label:"DCA",data:dcaArr,borderColor:'orange'},
+{label:"Cash",data:cashArr,borderColor:'red'}]}});
+}
 
-calculateCompound();
-runMonteCarlo();
-compareStrategies();
-generateHistorical();
+/* BOT */
+function bot(){
+let capital=botC.value;
+let prices=[],labels=[],p=100;
+for(let i=0;i<200;i++){
+p*=1+(Math.random()-0.48)/15;
+prices.push(p);
+labels.push(i);
+}
+let portfolio=capital;
+for(let i=0;i<prices.length;i++){
+portfolio*=1+(Math.random()-0.48)/15;
+}
+if(charts.b)charts.b.destroy();
+charts.b=new Chart(botChart,{type:'line',
+data:{labels:labels,datasets:[
+{label:"Asset",data:prices,borderColor:'green'}]}});
+}
+
+/* PORTFOLIO */
+function optimise(){
+let r1v=r1.value/v1.value;
+let r2v=r2.value/v2.value;
+let r3v=r3.value/v3.value;
+let sum=r1v+r2v+r3v;
+let w1=r1v/sum,w2=r2v/sum,w3=r3v/sum;
+if(charts.p)charts.p.destroy();
+charts.p=new Chart(portChart,{type:'pie',
+data:{labels:["A","B","C"],
+datasets:[{data:[w1*100,w2*100,w3*100]}]}});
+}
+
+/* SCATTER */
+charts.sc=new Chart(scatterChart,{type:'scatter',
+data:{datasets:[{label:"Assets",
+data:[{x:5,y:4},{x:10,y:8},{x:15,y:12},{x:20,y:18}]}]},
+options:{scales:{x:{title:{display:true,text:"Risk %"}},
+y:{title:{display:true,text:"Return %"}}}}});
+
+compound();
+inflationCalc();
+ratios();
+monte();
+strategy();
+bot();
+optimise();
 </script>
 
 </body>
